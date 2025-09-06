@@ -97,5 +97,11 @@ export default {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), function({ addUtilities }) {
+      addUtilities({
+        '.break-inside-avoid': {
+          'break-inside': 'avoid',
+        },
+      })
+    },],
 } satisfies Config;
