@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import Image from "next/image";
+import Link from "next/link";
 
 // Mock data, in a real app this would come from a database
 const products = {
@@ -72,17 +73,19 @@ export default function CategoryPage({ params }: { params: { category: string } 
 
             <div className="columns-2 md:columns-3 lg:columns-4 gap-8 space-y-8">
                 {categoryProducts.map((product) => (
-                    <Card key={product.id} className="overflow-hidden group break-inside-avoid">
-                        <CardContent className="p-0">
-                            <div className="relative overflow-hidden">
-                                <Image src={product.image} alt={product.name} width={product.width} height={product.height} className="object-cover w-full h-auto transition-transform group-hover:scale-110" data-ai-hint={product.hint} />
-                            </div>
-                            <div className="p-4">
-                                <h3 className="font-semibold text-lg">{product.name}</h3>
-                                <p className="text-muted-foreground">{product.price}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
+                     <Link key={product.id} href={`/products/${category}/${product.id}`} className="block">
+                        <Card className="overflow-hidden group break-inside-avoid">
+                            <CardContent className="p-0">
+                                <div className="relative overflow-hidden aspect-[4/5]">
+                                    <Image src={product.image} alt={product.name} fill className="object-cover w-full h-auto transition-transform group-hover:scale-110" data-ai-hint={product.hint} />
+                                </div>
+                                <div className="p-4">
+                                    <h3 className="font-semibold text-lg">{product.name}</h3>
+                                    <p className="text-muted-foreground">{product.price}</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
                 ))}
             </div>
         </div>
