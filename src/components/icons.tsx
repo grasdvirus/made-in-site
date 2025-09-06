@@ -1,7 +1,7 @@
 import type { SVGProps } from 'react';
 
 export const ShippingIcon = (props: SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a5 5 0 1 0 0 10 5 5 0 0 0 0-10Z"></path><path d="m22 17-1.5-1.5"></path></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M5 18H3c0-2.5 2-5 4-5h8c2.2 0 4 2.2 4 5Z"></path><path d="M5 9V5a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v4"></path><path d="M11 9h2"></path><path d="M5 18v-5h14v5"></path><path d="M2 12h20"></path></svg>
 );
 
 export const ReturnIcon = (props: SVGProps<SVGSVGElement>) => (

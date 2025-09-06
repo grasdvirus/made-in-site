@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ShippingIcon, ReturnIcon, RefundIcon, FileText, FileCheck, HelpCircle } from 'lucide-react';
+import { ShippingIcon, ReturnIcon, RefundIcon } from '@/components/icons';
+import { FileText, FileCheck, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AboutPage() {
