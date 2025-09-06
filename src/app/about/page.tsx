@@ -1,4 +1,7 @@
 import Image from 'next/image';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { ShippingIcon, ReturnIcon, RefundIcon } from '@/components/icons';
+import Link from 'next/link';
 
 export default function AboutPage() {
   return (
@@ -23,7 +26,7 @@ export default function AboutPage() {
             />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12 text-muted-foreground">
+        <div className="grid md:grid-cols-2 gap-12 text-muted-foreground mb-16">
             <div>
                 <h2 className="text-3xl font-bold font-headline text-foreground mb-4">Notre Histoire</h2>
                 <p className="mb-4">
@@ -42,6 +45,46 @@ export default function AboutPage() {
                     Avec notre guide de style alimenté par l'IA, nous allons au-delà de la simple vente de vêtements ; nous vous aidons à découvrir et à affiner votre style personnel, en veillant à ce que vous vous sentiez confiant et inspiré chaque jour.
                 </p>
             </div>
+        </div>
+
+        <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold font-headline text-foreground mb-4">Besoin d'aide ?</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+                Nous sommes là pour vous aider avec vos commandes, retours et toute autre question.
+            </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+             <Card>
+                <CardHeader>
+                    <ReturnIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
+                    <CardTitle className="text-xl">Retourner un produit</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground text-sm">Contactez-nous pour initier un retour.</p>
+                </CardContent>
+             </Card>
+             <Card>
+                <CardHeader>
+                    <RefundIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
+                    <CardTitle className="text-xl">Politique de remboursement</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground text-sm">Consultez nos conditions de remboursement.</p>
+                </CardContent>
+             </Card>
+             <Card>
+                <CardHeader>
+                    <ShippingIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
+                    <CardTitle className="text-xl">Suivre une commande</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground text-sm">Suivez votre commande en temps réel.</p>
+                </CardContent>
+             </Card>
+        </div>
+        <div className="text-center mt-8">
+            <p className="text-muted-foreground">Pour toute autre question, <Link href="/contact" className="text-primary hover:underline">contactez-nous</Link>.</p>
         </div>
       </div>
     </div>

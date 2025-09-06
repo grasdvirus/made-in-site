@@ -22,7 +22,7 @@ export function Footer() {
           <h5 className="font-bold mb-4">SUPPORT</h5>
           <ul className="space-y-3 text-sm text-muted-foreground">
             <li><Link href="/contact" className="hover:text-foreground">Retourner un produit</Link></li>
-            <li><Link href="/contact" className="hover-text-foreground">Politique de remboursement</Link></li>
+            <li><Link href="/contact" className="hover:text-foreground">Politique de remboursement</Link></li>
             <li><Link href="/contact" className="hover:text-foreground">Suivre une commande</Link></li>
             <li><Link href="/contact" className="hover:text-foreground">Nous contacter</Link></li>
           </ul>

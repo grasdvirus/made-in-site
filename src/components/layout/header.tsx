@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, Menu, Search, ShoppingBag, User, X, LogOut } from 'lucide-react';
+import { Heart, Menu, Search, ShoppingBag, User, X, LogOut, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -12,6 +12,12 @@ import {
   SheetClose,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu"
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -20,12 +26,14 @@ import { useRouter } from 'next/navigation';
 const navLinks = [
   { href: '/', label: 'Accueil' },
   { href: '/discover', label: 'Découvrir' },
-  { href: '/products', label: 'Produits' },
-  { href: '/products/femmes', label: 'Femmes' },
-  { href: '/products/hommes', label: 'Hommes' },
-  { href: '/products/montres', label: 'Montres' },
-  { href: '/products/sacs', label: 'Sacs' },
 ];
+
+const categoryLinks = [
+    { href: '/products/femmes', label: 'Femmes' },
+    { href: '/products/hommes', label: 'Hommes' },
+    { href: '/products/montres', label: 'Montres' },
+    { href: '/products/sacs', label: 'Sacs' },
+]
 
 export function Header() {
   const { user } = useAuth();
@@ -56,6 +64,24 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="text-sm text-muted-foreground hover:text-foreground p-0">
+                        Produits
+                        <ChevronDown className="h-4 w-4 ml-1" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuItem asChild>
+                        <Link href="/products">Toutes les catégories</Link>
+                    </DropdownMenuItem>
+                    {categoryLinks.map((link) => (
+                        <DropdownMenuItem key={link.label} asChild>
+                            <Link href={link.href}>{link.label}</Link>
+                        </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
         </div>
         <div className="flex items-center space-x-4">
@@ -130,6 +156,14 @@ export function Header() {
                     </Link>
                   </SheetClose>
                 ))}
+                <SheetClose asChild>
+                    <Link href="/products" className="text-muted-foreground hover:text-foreground">Produits</Link>
+                </SheetClose>
+                 {categoryLinks.map((link) => (
+                    <SheetClose asChild key={link.label}>
+                        <Link href={link.href} className="ml-4 text-muted-foreground/80 hover:text-foreground text-lg">{link.label}</Link>
+                    </SheetClose>
+                 ))}
               </nav>
             </SheetContent>
           </Sheet>
