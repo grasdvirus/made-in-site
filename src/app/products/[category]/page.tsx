@@ -10,7 +10,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import { getProductsByCategory, Product } from "@/lib/firebase/firestore";
+import { getProductsByCategory, Product } from "@/lib/products";
 
 const categoryNames: { [key: string]: string } = {
     femmes: "Femmes",
@@ -19,9 +19,9 @@ const categoryNames: { [key: string]: string } = {
     sacs: "Sacs",
 }
 
-export default async function CategoryPage({ params }: { params: { category: string } }) {
+export default function CategoryPage({ params }: { params: { category: string } }) {
     const { category } = params;
-    const categoryProducts = await getProductsByCategory(category);
+    const categoryProducts = getProductsByCategory(category);
     const categoryName = categoryNames[category] || "Catégorie";
 
     return (

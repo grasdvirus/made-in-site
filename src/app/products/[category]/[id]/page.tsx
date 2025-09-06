@@ -19,7 +19,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from 'react';
 import { ProductDetailsClient } from "./product-details-client";
-import { getProduct, getProductsByCategory, Product } from "@/lib/firebase/firestore";
+import { getProduct, getProductsByCategory, Product } from "@/lib/products";
 
 const categoryNames: { [key: string]: string } = {
   femmes: "Femmes",
@@ -28,19 +28,19 @@ const categoryNames: { [key: string]: string } = {
   sacs: "Sacs",
 };
 
-export default async function ProductDetailPage({
+export default function ProductDetailPage({
   params,
 }: {
   params: { category: string; id: string };
 }) {
   const { category, id } = params;
-  const product = await getProduct(id);
+  const product = getProduct(id);
 
   if (!product) {
     return <div>Produit non trouvé</div>;
   }
   
-  const relatedProducts = (await getProductsByCategory(category)).filter((p) => p.id !== product.id);
+  const relatedProducts = getProductsByCategory(category).filter((p) => p.id !== product.id);
   const categoryName = categoryNames[category] || "Catégorie";
 
   return (
