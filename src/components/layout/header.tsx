@@ -9,8 +9,8 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/s
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/discover', label: 'Discover' },
-  { href: '#', label: 'About Us' },
-  { href: '#', label: 'Help' },
+  { href: '/about', label: 'About Us' },
+  { href: '/help', label: 'Help' },
 ];
 
 export function Header() {
@@ -23,7 +23,7 @@ export function Header() {
           </Link>
           <nav className="hidden lg:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="text-sm text-muted-foreground hover:text-foreground">
+              <Link key={link.label} href={link.href} className="text-sm text-muted-foreground hover:text-foreground">
                 {link.label}
               </Link>
             ))}
@@ -72,7 +72,7 @@ export function Header() {
                 </div>
                 <nav className="flex flex-col items-start space-y-6 text-xl font-medium">
                     {navLinks.map((link) => (
-                        <SheetClose asChild key={link.href}>
+                        <SheetClose asChild key={link.label}>
                              <Link href={link.href} className="text-muted-foreground hover:text-foreground">
                                 {link.label}
                             </Link>
