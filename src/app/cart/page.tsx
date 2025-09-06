@@ -28,7 +28,7 @@ export default function CartPage() {
           <div className="lg:col-span-2">
             <Card>
               <CardContent className="p-6 space-y-6">
-                {cartItems.map((item) => (
+                {cartItems.length > 0 ? cartItems.map((item) => (
                   <div key={item.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <Image
@@ -64,7 +64,7 @@ export default function CartPage() {
                       </Button>
                     </div>
                   </div>
-                ))}
+                )) : <p>Votre panier est vide.</p>}
               </CardContent>
             </Card>
           </div>

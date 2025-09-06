@@ -1,3 +1,6 @@
+
+'use client'
+
 import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
@@ -20,6 +23,8 @@ import Image from "next/image";
 import { Minus, Plus, Star } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 // Mock data
 const products = {
@@ -65,12 +70,22 @@ export default function ProductDetailPage({
   const categoryProducts = products[category as keyof typeof products] || [];
   const product = categoryProducts.find((p) => p.id === parseInt(id));
   const categoryName = categoryNames[category] || "Catégorie";
+  const [quantity, setQuantity] = useState(1);
+  const { toast } = useToast();
   
   if (!product) {
     return <div>Produit non trouvé</div>;
   }
   
   const relatedProducts = categoryProducts.filter((p) => p.id !== product.id);
+
+  const handleAddToCart = () => {
+    // In a real app, you'd add the product to the cart state
+    toast({
+      title: "Produit ajouté au panier",
+      description: `${product.name} (x${quantity}) a été ajouté à votre panier.`,
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 md:px-6">
@@ -125,17 +140,17 @@ export default function ProductDetailPage({
           <div className="flex items-center gap-4 mb-6">
             <p>Quantité:</p>
             <div className="flex items-center border rounded-md">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setQuantity(q => Math.max(1, q - 1))}>
                     <Minus className="h-4 w-4" />
                 </Button>
-                <Input type="number" defaultValue={1} className="h-8 w-12 text-center border-0 bg-transparent" />
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Input type="number" value={quantity} onChange={e => setQuantity(parseInt(e.target.value) || 1)} className="h-8 w-12 text-center border-0 bg-transparent" />
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setQuantity(q => q + 1)}>
                     <Plus className="h-4 w-4" />
                 </Button>
             </div>
           </div>
 
-          <Button size="lg" className="w-full">Ajouter au panier</Button>
+          <Button size="lg" className="w-full" onClick={handleAddToCart}>Ajouter au panier</Button>
 
         </div>
       </div>

@@ -104,25 +104,31 @@ export function Header() {
               <Heart className="h-5 w-5" />
             </Button>
             <div className="w-px h-6 bg-border"></div>
-            <Button variant="ghost">
-              <ShoppingBag className="h-5 w-5 mr-2" />
-              <span className="font-semibold">0,00 €</span>
+            <Button variant="ghost" asChild>
+              <Link href="/cart">
+                <ShoppingBag className="h-5 w-5 mr-2" />
+                <span className="font-semibold">0,00 €</span>
+              </Link>
             </Button>
           </div>
           {user ? (
-            <>
-              <Button variant="ghost" className="flex items-center space-x-2 pl-4">
-                <Avatar className="w-8 h-8">
-                  {user.photoURL && <AvatarImage src={user.photoURL} alt="User Avatar" />}
-                  <AvatarFallback>{user.displayName?.[0] || user.email?.[0]}</AvatarFallback>
-                </Avatar>
-                <span className="hidden sm:inline font-semibold">{user.displayName || user.email}</span>
-              </Button>
-              <Button variant="ghost" size="icon" onClick={handleSignOut}>
-                <LogOut className="h-5 w-5" />
-                <span className="sr-only">Se déconnecter</span>
-              </Button>
-            </>
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center space-x-2 pl-4">
+                        <Avatar className="w-8 h-8">
+                        {user.photoURL && <AvatarImage src={user.photoURL} alt="User Avatar" />}
+                        <AvatarFallback>{user.displayName?.[0] || user.email?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <span className="hidden sm:inline font-semibold">{user.displayName || user.email}</span>
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Se déconnecter
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button asChild variant="ghost">
               <Link href="/login" className="flex items-center space-x-2">
