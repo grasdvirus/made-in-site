@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, Menu, Search, ShoppingBag, User, X, LogOut, ChevronDown } from 'lucide-react';
+import { Heart, Menu, Search, ShoppingBag, User, X, LogOut, ChevronDown, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -35,6 +35,9 @@ const categoryLinks = [
     { href: '/products/sacs', label: 'Sacs' },
 ]
 
+// Hardcoded admin UID for now
+const ADMIN_UID = 'REPLACE_WITH_YOUR_ADMIN_UID';
+
 export function Header() {
   const { user } = useAuth();
   const router = useRouter();
@@ -43,6 +46,8 @@ export function Header() {
     await signOut(auth);
     router.push('/');
   };
+
+  const isAdmin = user && user.uid === ADMIN_UID;
 
   return (
     <header className="p-6 border-b">
@@ -82,6 +87,12 @@ export function Header() {
                     ))}
                 </DropdownMenuContent>
             </DropdownMenu>
+            {isAdmin && (
+                <Link href="/admin" className="text-sm text-muted-foreground hover:text-foreground flex items-center">
+                    <Shield className="h-4 w-4 mr-1"/>
+                    Admin
+                </Link>
+            )}
           </nav>
         </div>
         <div className="flex items-center space-x-4">
@@ -164,6 +175,14 @@ export function Header() {
                         <Link href={link.href} className="ml-4 text-muted-foreground/80 hover:text-foreground text-lg">{link.label}</Link>
                     </SheetClose>
                  ))}
+                 {isAdmin && (
+                    <SheetClose asChild>
+                        <Link href="/admin" className="text-muted-foreground hover:text-foreground flex items-center">
+                             <Shield className="h-5 w-5 mr-2"/>
+                             Admin
+                        </Link>
+                    </SheetClose>
+                )}
               </nav>
             </SheetContent>
           </Sheet>

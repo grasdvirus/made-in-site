@@ -2,15 +2,19 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
-// Your web app's Firebase configuration
+// Your web app's Firebase configuration.
+// **IMPORTANT**: This is a placeholder configuration. Replace it with your actual
+// Firebase project configuration to connect the app to your Firebase backend.
+// You can get this from the Firebase console:
+// (Project Settings > General > Your apps > Firebase SDK snippet > Config)
 const firebaseConfig = {
-  apiKey: "AIzaSyAunf47hCXKytT856H-_Z-0ZAe65QIFto4",
-  authDomain: "made-in-site.firebaseapp.com",
-  projectId: "made-in-site",
-  storageBucket: "made-in-site.firebasestorage.app",
-  messagingSenderId: "198664791827",
-  appId: "1:198664791827:web:369cbd547a3a3dbd40dce6",
-  measurementId: "G-PF2J62N5P1"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+  measurementId: "YOUR_MEASUREMENT_ID"
 };
 
 // Initialize Firebase
