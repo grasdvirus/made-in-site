@@ -6,7 +6,7 @@ export function HeroSection() {
   return (
     <section className="p-6 md:p-10">
       <div className="relative overflow-hidden rounded-2xl p-8 md:p-16 lg:p-24 text-white flex flex-col justify-center min-h-[500px] bg-cover bg-center" style={{ backgroundImage: "url('https://picsum.photos/1400/500')" }} data-ai-hint="fashion sale">
-        <div className="absolute inset-0 bg-black bg-opacity-40 rounded-2xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-black/80 to-transparent rounded-2xl"></div>
         <div className="relative z-10">
           <h2 className="text-5xl md:text-7xl font-bold max-w-lg leading-tight font-headline">SOLDES DU BLACK FRIDAY</h2>
           <p className="mt-4 text-lg">20 Nov - 30 Nov</p>

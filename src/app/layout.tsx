@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/hooks/use-auth';
+import { ClientLayout } from '@/components/layout/client-layout';
 
 export const metadata: Metadata = {
   title: 'EzyRetail AI',
@@ -22,16 +23,18 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased bg-background">
+      <body className="font-body antialiased">
         <AuthProvider>
-            <div className="p-4 md:p-8">
-                <div className="max-w-screen-2xl mx-auto bg-card rounded-3xl shadow-lg overflow-hidden">
-                    <Header />
-                    {children}
-                    <Footer />
+            <ClientLayout>
+                <div className="p-4 md:p-8">
+                    <div className="max-w-screen-2xl mx-auto bg-card rounded-3xl shadow-lg overflow-hidden">
+                        <Header />
+                        {children}
+                        <Footer />
+                    </div>
                 </div>
-            </div>
-            <Toaster />
+                <Toaster />
+            </ClientLayout>
         </AuthProvider>
       </body>
     </html>

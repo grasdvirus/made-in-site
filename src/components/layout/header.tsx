@@ -50,7 +50,7 @@ export function Header() {
   const isAdmin = user && user.email === ADMIN_EMAIL;
 
   return (
-    <header className="p-6 border-b">
+    <header className="p-6 border-b bg-background/50">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-12">
           <Link
@@ -107,7 +107,7 @@ export function Header() {
             <Button variant="ghost" asChild>
               <Link href="/cart">
                 <ShoppingBag className="h-5 w-5 mr-2" />
-                <span className="font-semibold">0,00 €</span>
+                <span className="font-semibold">0 FCFA</span>
               </Link>
             </Button>
           </div>
