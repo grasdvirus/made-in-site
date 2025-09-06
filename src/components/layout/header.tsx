@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, Menu, Search, ShoppingBag, X } from 'lucide-react';
+import { Heart, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose, SheetTrigger } from '@/components/ui/sheet';
 
 const navLinks = [
   { href: '/', label: 'Accueil' },
@@ -14,6 +14,8 @@ const navLinks = [
 ];
 
 export function Header() {
+  const user = null; // Remplacer par la logique d'authentification
+
   return (
     <header className="p-6 border-b">
       <div className="flex items-center justify-between">
@@ -40,16 +42,25 @@ export function Header() {
             <div className="w-px h-6 bg-border"></div>
             <Button variant="ghost">
               <ShoppingBag className="h-5 w-5 mr-2" />
-              <span className="font-semibold">$90.49</span>
+              <span className="font-semibold">0,00 €</span>
             </Button>
           </div>
-          <Button variant="ghost" className="flex items-center space-x-2 pl-4">
-            <Avatar className="w-8 h-8">
-              <AvatarImage src="https://i.pravatar.cc/40?u=chintan" alt="User Avatar" />
-              <AvatarFallback>C</AvatarFallback>
-            </Avatar>
-            <span className="hidden sm:inline font-semibold">Chintan</span>
-          </Button>
+          {user ? (
+            <Button variant="ghost" className="flex items-center space-x-2 pl-4">
+              <Avatar className="w-8 h-8">
+                <AvatarImage src="https://i.pravatar.cc/40?u=chintan" alt="User Avatar" />
+                <AvatarFallback>C</AvatarFallback>
+              </Avatar>
+              <span className="hidden sm:inline font-semibold">Chintan</span>
+            </Button>
+          ) : (
+            <Button asChild variant="ghost">
+              <Link href="/login" className="flex items-center space-x-2">
+                <User className="h-5 w-5" />
+                <span className="hidden sm:inline font-semibold">Connexion</span>
+              </Link>
+            </Button>
+          )}
 
           <Sheet>
             <SheetTrigger asChild>
@@ -59,7 +70,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-full max-w-sm">
-              <SheetHeader className="p-6 border-b -m-6 mb-6 flex flex-row justify-between items-center">
+               <SheetHeader className="p-6 border-b -m-6 mb-6 flex flex-row justify-between items-center">
                 <SheetTitle>
                     <Link href="/" className="text-xl font-bold tracking-widest font-headline">
                         EZY•RETAIL
