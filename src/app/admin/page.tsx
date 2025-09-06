@@ -3,33 +3,48 @@
 
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Edit, Star, Truck, ImageIcon, LayoutGrid, Info, MessageSquare, Settings, Tag } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getProducts, Product } from '@/lib/firebase/firestore';
 
 
 // Hardcoded admin email
 const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 
-const productsByCategory = {
-  "COMPENSEE": [],
-  "Henan": [],
-  "talon hauts": [],
-  "Talons épais": [],
-  "Astaryo": []
-}
-
 export default function AdminPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsByCategory, setProductsByCategory] = useState<Record<string, Product[]>>({});
+  
   useEffect(() => {
     if (!loading && (!user || user.email !== ADMIN_EMAIL)) {
       router.push('/');
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    async function fetchProducts() {
+        const productsFromDb = await getProducts();
+        setProducts(productsFromDb);
+
+        const byCategory = productsFromDb.reduce((acc, product) => {
+            const category = product.category || 'Uncategorized';
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push(product);
+            return acc;
+        }, {} as Record<string, Product[]>);
+        setProductsByCategory(byCategory);
+    }
+    if (user) {
+        fetchProducts();
+    }
+  }, [user]);
 
   if (loading || !user) {
     return (
@@ -81,11 +96,16 @@ export default function AdminPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {Object.keys(productsByCategory).map((category) => (
-                        <div key={category} className="flex items-center justify-between p-4 border rounded-lg">
-                            <span className="font-medium">{category}</span>
-                            <Button variant="ghost" size="icon">
-                                <Edit className="h-4 w-4" />
-                            </Button>
+                        <div key={category}>
+                            <h3 className="text-lg font-semibold my-4">{category}</h3>
+                            {productsByCategory[category].map(product => (
+                                <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg mb-2">
+                                    <span className="font-medium">{product.name}</span>
+                                    <Button variant="ghost" size="icon">
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
                         </div>
                     ))}
                      <div className="flex justify-end mt-6">

@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { Product } from "@/lib/firebase/firestore";
 import { Minus, Plus, Star } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
-export function ProductDetailsClient({ product }: { product: any }) {
+export function ProductDetailsClient({ product }: { product: Product }) {
     const [quantity, setQuantity] = useState(1);
     const { toast } = useToast();
 
@@ -24,11 +25,11 @@ export function ProductDetailsClient({ product }: { product: any }) {
         <div className="grid md:grid-cols-2 gap-12">
             <div>
             <Image
-                src={product.image}
+                src={product.imageUrl}
                 alt={product.name}
                 width={600}
                 height={800}
-                className="rounded-lg object-cover w-full"
+                className="rounded-lg object-cover w-full aspect-[4/5]"
                 data-ai-hint={product.hint}
             />
             </div>
@@ -42,7 +43,7 @@ export function ProductDetailsClient({ product }: { product: any }) {
                 </div>
                 <span className="text-muted-foreground">(12 avis)</span>
             </div>
-            <p className="text-3xl font-semibold mb-6">{product.price}</p>
+            <p className="text-3xl font-semibold mb-6">{product.price.toLocaleString('fr-FR')} FCFA</p>
             <p className="text-muted-foreground mb-6">{product.description}</p>
             
             <Separator className="my-6" />
