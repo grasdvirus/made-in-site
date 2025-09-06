@@ -13,11 +13,12 @@ const firebaseConfig = {
   apiKey: "AIzaSyAunf47hCXKytT856H-_Z-0ZAe65QIFto4",
   authDomain: "made-in-site.firebaseapp.com",
   projectId: "made-in-site",
-  storageBucket: "made-in-site.firebasestorage.app",
+  storageBucket: "made-in-site.appspot.com",
   messagingSenderId: "198664791827",
   appId: "1:198664791827:web:369cbd547a3a3dbd40dce6",
   measurementId: "G-PF2J62N5P1"
 };
+
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();

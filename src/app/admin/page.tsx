@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Edit, Star, Truck, ImageIcon, LayoutGrid, Info, MessageSquare, Settings, Tag } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getProducts, Product } from '@/lib/firebase/firestore';
+import { AddProductDialog } from './add-product-dialog';
 
 
 // Hardcoded admin email
@@ -19,6 +20,7 @@ export default function AdminPage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [productsByCategory, setProductsByCategory] = useState<Record<string, Product[]>>({});
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   
   useEffect(() => {
     if (!loading && (!user || user.email !== ADMIN_EMAIL)) {
@@ -26,25 +28,30 @@ export default function AdminPage() {
     }
   }, [user, loading, router]);
 
-  useEffect(() => {
-    async function fetchProducts() {
-        const productsFromDb = await getProducts();
-        setProducts(productsFromDb);
+  async function fetchProducts() {
+    const productsFromDb = await getProducts();
+    setProducts(productsFromDb);
 
-        const byCategory = productsFromDb.reduce((acc, product) => {
-            const category = product.category || 'Uncategorized';
-            if (!acc[category]) {
-                acc[category] = [];
-            }
-            acc[category].push(product);
-            return acc;
-        }, {} as Record<string, Product[]>);
-        setProductsByCategory(byCategory);
-    }
+    const byCategory = productsFromDb.reduce((acc, product) => {
+        const category = product.category || 'Uncategorized';
+        if (!acc[category]) {
+            acc[category] = [];
+        }
+        acc[category].push(product);
+        return acc;
+    }, {} as Record<string, Product[]>);
+    setProductsByCategory(byCategory);
+  }
+
+  useEffect(() => {
     if (user) {
         fetchProducts();
     }
   }, [user]);
+
+  const handleProductAdded = () => {
+    fetchProducts(); // Refresh the product list
+  }
 
   if (loading || !user) {
     return (
@@ -61,6 +68,7 @@ export default function AdminPage() {
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+       <AddProductDialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen} onProductAdded={handleProductAdded} />
        <Tabs defaultValue="products" className="space-y-4">
         <TabsList>
             <TabsTrigger value="products"><Tag className="mr-2 h-4 w-4" />Produits</TabsTrigger>
@@ -88,31 +96,30 @@ export default function AdminPage() {
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Nouvelle Catégorie
                     </Button>
-                    <Button>
+                    <Button onClick={() => setIsAddProductOpen(true)}>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Ajouter un produit
                     </Button>
                 </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {Object.keys(productsByCategory).map((category) => (
-                        <div key={category}>
-                            <h3 className="text-lg font-semibold my-4">{category}</h3>
-                            {productsByCategory[category].map(product => (
-                                <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg mb-2">
-                                    <span className="font-medium">{product.name}</span>
-                                    <Button variant="ghost" size="icon">
-                                        <Edit className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                    ))}
-                     <div className="flex justify-end mt-6">
-                        <Button>
-                            Enregistrer les modifications
-                        </Button>
-                    </div>
+                    {Object.keys(productsByCategory).length === 0 ? (
+                        <p className="text-muted-foreground text-center p-8">Aucun produit trouvé. Ajoutez votre premier produit !</p>
+                    ) : (
+                        Object.keys(productsByCategory).map((category) => (
+                            <div key={category}>
+                                <h3 className="text-lg font-semibold my-4">{category}</h3>
+                                {productsByCategory[category].map(product => (
+                                    <div key={product.id} className="flex items-center justify-between p-4 border rounded-lg mb-2">
+                                        <span className="font-medium">{product.name}</span>
+                                        <Button variant="ghost" size="icon">
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        ))
+                    )}
                 </CardContent>
             </Card>
         </TabsContent>
