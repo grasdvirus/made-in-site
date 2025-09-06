@@ -20,6 +20,11 @@ import { useRouter } from 'next/navigation';
 const navLinks = [
   { href: '/', label: 'Accueil' },
   { href: '/discover', label: 'Découvrir' },
+  { href: '/products', label: 'Produits' },
+  { href: '/products/femmes', label: 'Femmes' },
+  { href: '/products/hommes', label: 'Hommes' },
+  { href: '/products/montres', label: 'Montres' },
+  { href: '/products/sacs', label: 'Sacs' },
 ];
 
 export function Header() {
