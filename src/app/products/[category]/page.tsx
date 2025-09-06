@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 
 // Mock data, in a real app this would come from a database
 const products: Record<string, any[]> = {
@@ -47,7 +48,7 @@ const categoryNames: { [key: string]: string } = {
 }
 
 export default function CategoryPage({ params }: { params: { category: string } }) {
-    const { category } = params;
+    const { category } = React.use(params);
     const categoryProducts = products[category] || [];
     const categoryName = categoryNames[category] || "Catégorie";
 
