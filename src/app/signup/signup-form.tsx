@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 const formSchema = z.object({
+  name: z.string().min(2, { message: 'Le nom doit contenir au moins 2 caractères.'}),
   email: z.string().email({
     message: 'Veuillez saisir une adresse e-mail valide.',
   }),
@@ -52,7 +53,7 @@ const GoogleIcon = () => (
     </svg>
   );
 
-export function LoginForm() {
+export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -60,6 +61,7 @@ export function LoginForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
     },
@@ -70,15 +72,16 @@ export function LoginForm() {
     setError(null);
 
     try {
-      await signInWithEmailAndPassword(auth, values.email, values.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      await updateProfile(userCredential.user, { displayName: values.name });
       router.push('/');
     } catch (e: any) {
-      if (e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
-        setError('Adresse e-mail ou mot de passe incorrect.');
-      } else {
-        setError('Une erreur est survenue. Veuillez réessayer.');
-      }
-      console.error(e);
+        if (e.code === 'auth/email-already-in-use') {
+            setError('Cette adresse e-mail est déjà utilisée.');
+        } else {
+            setError('Une erreur est survenue. Veuillez réessayer.');
+        }
+        console.error(e);
     } finally {
       setIsLoading(false);
     }
@@ -102,11 +105,24 @@ export function LoginForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Accédez à votre compte</CardTitle>
+        <CardTitle>Créez votre compte</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Votre nom" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"
@@ -140,19 +156,19 @@ export function LoginForm() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Connexion en cours...
+                  Création du compte...
                 </>
               ) : (
-                'Se connecter'
+                "S'inscrire"
               )}
             </Button>
-             <div className="relative">
+            <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                     <span className="bg-card px-2 text-muted-foreground">
-                    Ou continuer avec
+                    Ou s'inscrire avec
                     </span>
                 </div>
             </div>
@@ -164,7 +180,7 @@ export function LoginForm() {
         </Form>
       </CardContent>
       <CardFooter className="text-sm text-center block">
-          <p>Pas encore de compte ? <Link href="/signup" className="text-primary hover:underline">Inscrivez-vous</Link></p>
+          <p>Vous avez déjà un compte ? <Link href="/login" className="text-primary hover:underline">Connectez-vous</Link></p>
       </CardFooter>
     </Card>
   );
