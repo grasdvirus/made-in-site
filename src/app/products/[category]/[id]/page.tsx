@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 // Mock data
-const products = {
+const products: Record<string, any[]> = {
   femmes: [
     { id: 1, name: "Robe d'été florale", price: "79,99 €", image: "https://picsum.photos/400/600?random=11", hint: "floral dress", width: 400, height: 600, description: "Une robe d'été légère et aérée, parfaite pour les journées ensoleillées. Tissu en coton doux avec un imprimé floral vibrant." },
     { id: 2, name: "Blazer ajusté", price: "129,99 €", image: "https://picsum.photos/400/500?random=12", hint: "fitted blazer", width: 400, height: 500, description: "Un blazer élégant et ajusté qui peut être porté au bureau ou pour une soirée. Entièrement doublé avec une fermeture à un seul bouton." },
@@ -67,7 +68,7 @@ export default function ProductDetailPage({
   params: { category: string; id: string };
 }) {
   const { category, id } = params;
-  const categoryProducts = products[category as keyof typeof products] || [];
+  const categoryProducts = products[category] || [];
   const product = categoryProducts.find((p) => p.id === parseInt(id));
   const categoryName = categoryNames[category] || "Catégorie";
   const [quantity, setQuantity] = useState(1);

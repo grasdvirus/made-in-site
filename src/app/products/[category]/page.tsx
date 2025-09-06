@@ -12,7 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 // Mock data, in a real app this would come from a database
-const products = {
+const products: Record<string, any[]> = {
   femmes: [
     { id: 1, name: "Robe d'été florale", price: "79,99 €", image: "https://picsum.photos/400/600?random=11", hint:"floral dress", width: 400, height: 600 },
     { id: 2, name: "Blazer ajusté", price: "129,99 €", image: "https://picsum.photos/400/500?random=12", hint:"fitted blazer", width: 400, height: 500 },
@@ -48,7 +48,7 @@ const categoryNames: { [key: string]: string } = {
 
 export default function CategoryPage({ params }: { params: { category: string } }) {
     const { category } = params;
-    const categoryProducts = products[category as keyof typeof products] || [];
+    const categoryProducts = products[category] || [];
     const categoryName = categoryNames[category] || "Catégorie";
 
     return (
