@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Heart, Menu, Search, ShoppingBag, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -59,26 +59,28 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-full max-w-sm">
-                <div className="flex justify-between items-center p-6 border-b -m-6 mb-6">
+              <SheetHeader className="p-6 border-b -m-6 mb-6 flex flex-row justify-between items-center">
+                <SheetTitle>
                     <Link href="/" className="text-xl font-bold tracking-widest font-headline">
                         EZY•RETAIL
                     </Link>
-                    <SheetClose asChild>
-                         <Button variant="ghost" size="icon">
-                            <X className="h-6 w-6" />
-                            <span className="sr-only">Close menu</span>
-                        </Button>
-                    </SheetClose>
-                </div>
-                <nav className="flex flex-col items-start space-y-6 text-xl font-medium">
-                    {navLinks.map((link) => (
-                        <SheetClose asChild key={link.label}>
-                             <Link href={link.href} className="text-muted-foreground hover:text-foreground">
-                                {link.label}
-                            </Link>
-                        </SheetClose>
-                    ))}
-                </nav>
+                </SheetTitle>
+                <SheetClose asChild>
+                     <Button variant="ghost" size="icon">
+                        <X className="h-6 w-6" />
+                        <span className="sr-only">Close menu</span>
+                    </Button>
+                </SheetClose>
+              </SheetHeader>
+              <nav className="flex flex-col items-start space-y-6 text-xl font-medium">
+                  {navLinks.map((link) => (
+                      <SheetClose asChild key={link.label}>
+                           <Link href={link.href} className="text-muted-foreground hover:text-foreground">
+                              {link.label}
+                          </Link>
+                      </SheetClose>
+                  ))}
+              </nav>
             </SheetContent>
           </Sheet>
         </div>
