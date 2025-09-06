@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ShippingIcon, ReturnIcon, RefundIcon } from '@/components/icons';
+import { ShippingIcon, ReturnIcon, RefundIcon, FileText, FileCheck, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AboutPage() {
@@ -55,36 +55,72 @@ export default function AboutPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-             <Card>
-                <CardHeader>
-                    <ReturnIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
-                    <CardTitle className="text-xl">Retourner un produit</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground text-sm">Contactez-nous pour initier un retour.</p>
-                </CardContent>
-             </Card>
-             <Card>
-                <CardHeader>
-                    <RefundIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
-                    <CardTitle className="text-xl">Politique de remboursement</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground text-sm">Consultez nos conditions de remboursement.</p>
-                </CardContent>
-             </Card>
-             <Card>
-                <CardHeader>
-                    <ShippingIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
-                    <CardTitle className="text-xl">Suivre une commande</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground text-sm">Suivez votre commande en temps réel.</p>
-                </CardContent>
-             </Card>
-        </div>
-        <div className="text-center mt-8">
-            <p className="text-muted-foreground">Pour toute autre question, <Link href="/contact" className="text-primary hover:underline">contactez-nous</Link>.</p>
+            <Link href="/contact">
+                <Card className="h-full">
+                    <CardHeader>
+                        <ReturnIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
+                        <CardTitle className="text-xl">Retourner un produit</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground text-sm">Contactez-nous pour initier un retour.</p>
+                    </CardContent>
+                </Card>
+            </Link>
+            <Link href="/privacy-policy">
+                <Card className="h-full">
+                    <CardHeader>
+                        <RefundIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
+                        <CardTitle className="text-xl">Politique de remboursement</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground text-sm">Consultez nos conditions de remboursement.</p>
+                    </CardContent>
+                </Card>
+            </Link>
+            <Link href="/contact">
+                <Card className="h-full">
+                    <CardHeader>
+                        <ShippingIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
+                        <CardTitle className="text-xl">Suivre une commande</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground text-sm">Suivez votre commande en temps réel.</p>
+                    </CardContent>
+                </Card>
+            </Link>
+            <Link href="/privacy-policy">
+                <Card className="h-full">
+                    <CardHeader>
+                        <FileText className="mx-auto mb-4 h-10 w-10 text-primary" />
+                        <CardTitle className="text-xl">Politique de confidentialité</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground text-sm">Lisez notre politique de confidentialité.</p>
+                    </CardContent>
+                </Card>
+            </Link>
+            <Link href="/terms-and-conditions">
+                <Card className="h-full">
+                    <CardHeader>
+                        <FileCheck className="mx-auto mb-4 h-10 w-10 text-primary" />
+                        <CardTitle className="text-xl">Termes & Conditions</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground text-sm">Lisez nos termes et conditions.</p>
+                    </CardContent>
+                </Card>
+            </Link>
+             <Link href="/contact">
+                <Card className="h-full">
+                    <CardHeader>
+                        <HelpCircle className="mx-auto mb-4 h-10 w-10 text-primary" />
+                        <CardTitle className="text-xl">Nous contacter</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground text-sm">Pour toute autre question, contactez-nous.</p>
+                    </CardContent>
+                </Card>
+            </Link>
         </div>
       </div>
     </div>
