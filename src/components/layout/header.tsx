@@ -35,8 +35,8 @@ const categoryLinks = [
     { href: '/products/sacs', label: 'Sacs' },
 ]
 
-// Hardcoded admin UID for now
-const ADMIN_UID = 'REPLACE_WITH_YOUR_ADMIN_UID';
+// Hardcoded admin email
+const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 
 export function Header() {
   const { user } = useAuth();
@@ -47,7 +47,7 @@ export function Header() {
     router.push('/');
   };
 
-  const isAdmin = user && user.uid === ADMIN_UID;
+  const isAdmin = user && user.email === ADMIN_EMAIL;
 
   return (
     <header className="p-6 border-b">

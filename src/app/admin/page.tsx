@@ -8,15 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 
-// Hardcoded admin UID for now
-const ADMIN_UID = 'REPLACE_WITH_YOUR_ADMIN_UID';
+// Hardcoded admin email
+const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 
 export default function AdminPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && (!user || user.uid !== ADMIN_UID)) {
+    if (!loading && (!user || user.email !== ADMIN_EMAIL)) {
       router.push('/');
     }
   }, [user, loading, router]);
@@ -29,7 +29,7 @@ export default function AdminPage() {
     );
   }
   
-  if (user.uid !== ADMIN_UID) {
+  if (user.email !== ADMIN_EMAIL) {
     return null;
   }
 
