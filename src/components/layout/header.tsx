@@ -7,10 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 
 const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/discover', label: 'Discover' },
-  { href: '/about', label: 'About Us' },
-  { href: '/help', label: 'Help' },
+  { href: '/', label: 'Accueil' },
+  { href: '/discover', label: 'Découvrir' },
+  { href: '/about', label: 'À propos' },
+  { href: '/help', label: 'Aide' },
 ];
 
 export function Header() {
@@ -55,7 +55,7 @@ export function Header() {
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="lg:hidden">
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">Ouvrir le menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-full max-w-sm">
@@ -68,7 +68,7 @@ export function Header() {
                 <SheetClose asChild>
                      <Button variant="ghost" size="icon">
                         <X className="h-6 w-6" />
-                        <span className="sr-only">Close menu</span>
+                        <span className="sr-only">Fermer le menu</span>
                     </Button>
                 </SheetClose>
               </SheetHeader>

@@ -25,16 +25,16 @@ import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
   preferences: z.string().min(10, {
-    message: 'Please describe your preferences in at least 10 characters.',
+    message: 'Veuillez décrire vos préférences en au moins 10 caractères.',
   }),
 });
 
 const browsingHistory = [
-    'Classic Trench Coat',
-    'Leather Ankle Boots',
-    'Silk Scarf',
-    'High-Waisted Skinny Jeans',
-    'Cashmere Sweater',
+    'Trench-coat classique',
+    'Bottines en cuir',
+    'Foulard en soie',
+    'Jean skinny taille haute',
+    'Pull en cachemire',
 ];
 
 export function StyleForm() {
@@ -60,7 +60,7 @@ export function StyleForm() {
       });
       setRecommendations(result);
     } catch (e) {
-      setError('Sorry, we couldn\'t generate recommendations at this time. Please try again.');
+      setError('Désolé, nous n\'avons pas pu générer de recommandations pour le moment. Veuillez réessayer.');
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -71,10 +71,10 @@ export function StyleForm() {
     <div className="grid md:grid-cols-3 gap-8">
       <Card className="md:col-span-1">
         <CardHeader>
-          <CardTitle>Your Profile</CardTitle>
+          <CardTitle>Votre profil</CardTitle>
         </CardHeader>
         <CardContent>
-          <h4 className="font-semibold mb-2">Recent Views</h4>
+          <h4 className="font-semibold mb-2">Vus récemment</h4>
           <div className="flex flex-wrap gap-2">
             {browsingHistory.map((item) => (
               <Badge key={item} variant="secondary">{item}</Badge>
@@ -86,7 +86,7 @@ export function StyleForm() {
       <div className="md:col-span-2">
         <Card>
           <CardHeader>
-            <CardTitle>Describe Your Style</CardTitle>
+            <CardTitle>Décrivez votre style</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -97,11 +97,11 @@ export function StyleForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        What are you looking for? (e.g., "casual outfits for weekends", "a professional look for work", "bright summer colors")
+                        Que recherchez-vous ? (par ex., "tenues décontractées pour le week-end", "un look professionnel pour le travail", "couleurs vives pour l'été")
                       </FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="I love vintage styles and comfortable, natural fabrics like cotton and linen..."
+                          placeholder="J'adore les styles vintage et les tissus naturels et confortables comme le coton et le lin..."
                           rows={4}
                           {...field}
                         />
@@ -114,12 +114,12 @@ export function StyleForm() {
                   {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
+                      Génération...
                     </>
                   ) : (
                     <>
                       <Wand2 className="mr-2 h-4 w-4" />
-                      Get Recommendations
+                      Obtenir des recommandations
                     </>
                   )}
                 </Button>
@@ -128,7 +128,7 @@ export function StyleForm() {
 
             {recommendations && recommendations.recommendations.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-xl font-semibold mb-4 font-headline">Our Suggestions for You</h3>
+                <h3 className="text-xl font-semibold mb-4 font-headline">Nos suggestions pour vous</h3>
                 <ul className="space-y-2">
                   {recommendations.recommendations.map((rec, index) => (
                     <li key={index} className="flex items-center p-3 bg-muted/50 rounded-md">

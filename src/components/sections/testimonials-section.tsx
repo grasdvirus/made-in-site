@@ -12,7 +12,7 @@ const testimonials = [
     name: "Darrell Steward",
     avatar: "https://i.pravatar.cc/56?u=darrell",
     rating: 5,
-    quote: "10 years ago, it was extremely difficult to get a piece that fits the space you are creating. Mobile coffee tables to decorative pieces etc. You now have tasteful designers that have designed beautiful pieces for you to choose from."
+    quote: "Il y a 10 ans, il était extrêmement difficile de trouver une pièce qui s'adapte à l'espace que vous créez. Des tables basses mobiles aux pièces décoratives, etc. Vous avez maintenant des designers de bon goût qui ont conçu de belles pièces parmi lesquelles choisir."
   },
   {
     name: "Jeremy Wilson",
@@ -27,7 +27,7 @@ const TestimonialCard = ({ name, avatar, rating, quote, isCenter }: { name: stri
             <CardContent className="p-6">
                 <div className="flex items-center mb-4">
                     <Avatar className={isCenter ? "w-14 h-14" : "w-10 h-10"}>
-                        <AvatarImage src={avatar} alt={`Avatar of ${name}`} />
+                        <AvatarImage src={avatar} alt={`Avatar de ${name}`} />
                         <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="ml-4">
@@ -48,8 +48,8 @@ const TestimonialCard = ({ name, avatar, rating, quote, isCenter }: { name: stri
 export function TestimonialsSection() {
     return (
         <section className="py-16 px-6 md:px-10 text-center">
-            <h3 className="text-4xl font-bold mb-4 font-headline">TESTIMONIAL TRUTHS</h3>
-            <p className="text-muted-foreground max-w-2xl mx-auto mb-12">We are where we are today because of you!</p>
+            <h3 className="text-4xl font-bold mb-4 font-headline">TÉMOIGNAGES</h3>
+            <p className="text-muted-foreground max-w-2xl mx-auto mb-12">Nous sommes là où nous sommes aujourd'hui grâce à vous !</p>
             <div className="relative">
                 <div className="flex items-center justify-center space-x-2 md:space-x-4">
                     <TestimonialCard {...testimonials[0]} />
