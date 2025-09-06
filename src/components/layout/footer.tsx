@@ -4,7 +4,7 @@ import { Facebook, Instagram } from 'lucide-react';
 export function Footer() {
   return (
     <footer className="bg-card border-t">
-      <div className="py-16 px-6 md:px-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="container mx-auto py-16 px-6 md:px-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <div>
           <h1 className="text-xl font-bold tracking-widest mb-2 font-headline">EZY•RETAIL</h1>
           <p className="text-muted-foreground text-sm">Où vous créez votre propre style.</p>
@@ -37,7 +37,7 @@ export function Footer() {
           </ul>
         </div>
       </div>
-      <div className="py-6 px-6 md:px-10 border-t flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
+      <div className="container mx-auto py-6 px-6 md:px-10 border-t flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
         <div className="flex space-x-4 mb-4 sm:mb-0">
           <Link href="/privacy-policy" className="hover:text-foreground">Politique de confidentialité</Link>
           <Link href="/terms-and-conditions" className="hover:text-foreground">Conditions de service</Link>

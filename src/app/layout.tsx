@@ -26,12 +26,10 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <AuthProvider>
             <ClientLayout>
-                <div className="p-4 md:p-8">
-                    <div className="max-w-screen-2xl mx-auto bg-card rounded-3xl shadow-lg overflow-hidden">
-                        <Header />
-                        {children}
-                        <Footer />
-                    </div>
+                <div className="bg-card shadow-lg overflow-hidden">
+                    <Header />
+                    {children}
+                    <Footer />
                 </div>
                 <Toaster />
             </ClientLayout>
