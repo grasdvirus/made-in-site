@@ -1,18 +1,30 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 
 // Générer 20 images de produits aléatoires
-const products = Array.from({ length: 20 }, (_, i) => ({
-    id: i + 1,
-    name: `Produit ${i + 1}`,
-    image: `https://picsum.photos/seed/${Math.random()}/400/${Math.floor(Math.random() * (600 - 400 + 1) + 400)}`,
-    hint: "fashion product",
-    width: 400,
-    height: Math.floor(Math.random() * (600 - 400 + 1) + 400)
-}));
+const generateProducts = () => Array.from({ length: 20 }, (_, i) => {
+    const height = Math.floor(Math.random() * (600 - 400 + 1) + 400);
+    return {
+        id: i + 1,
+        name: `Produit ${i + 1}`,
+        image: `https://picsum.photos/seed/${Math.random()}/400/${height}`,
+        hint: "fashion product",
+        width: 400,
+        height: height
+    }
+});
 
 
 export default function DiscoverPage() {
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    setProducts(generateProducts());
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-12 md:px-6 lg:py-16">
       <div className="max-w-3xl mx-auto text-center">

@@ -56,7 +56,7 @@ export default function AboutPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <Link href="/contact">
+            <Link href="/contact" className="h-full block">
                 <Card className="h-full">
                     <CardHeader>
                         <ReturnIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
@@ -67,7 +67,7 @@ export default function AboutPage() {
                     </CardContent>
                 </Card>
             </Link>
-            <Link href="/privacy-policy">
+            <Link href="/privacy-policy" className="h-full block">
                 <Card className="h-full">
                     <CardHeader>
                         <RefundIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
@@ -78,7 +78,7 @@ export default function AboutPage() {
                     </CardContent>
                 </Card>
             </Link>
-            <Link href="/contact">
+            <Link href="/contact" className="h-full block">
                 <Card className="h-full">
                     <CardHeader>
                         <ShippingIcon className="mx-auto mb-4 h-10 w-10 text-primary" />
@@ -89,7 +89,7 @@ export default function AboutPage() {
                     </CardContent>
                 </Card>
             </Link>
-            <Link href="/privacy-policy">
+            <Link href="/privacy-policy" className="h-full block">
                 <Card className="h-full">
                     <CardHeader>
                         <FileText className="mx-auto mb-4 h-10 w-10 text-primary" />
@@ -100,7 +100,7 @@ export default function AboutPage() {
                     </CardContent>
                 </Card>
             </Link>
-            <Link href="/terms-and-conditions">
+            <Link href="/terms-and-conditions" className="h-full block">
                 <Card className="h-full">
                     <CardHeader>
                         <FileCheck className="mx-auto mb-4 h-10 w-10 text-primary" />
@@ -111,7 +111,7 @@ export default function AboutPage() {
                     </CardContent>
                 </Card>
             </Link>
-             <Link href="/contact">
+             <Link href="/contact" className="h-full block">
                 <Card className="h-full">
                     <CardHeader>
                         <HelpCircle className="mx-auto mb-4 h-10 w-10 text-primary" />
