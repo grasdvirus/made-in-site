@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export function HeroSection() {
   return (
@@ -10,9 +11,11 @@ export function HeroSection() {
           <h2 className="text-5xl md:text-7xl font-bold max-w-lg leading-tight font-headline">SOLDES DU BLACK FRIDAY</h2>
           <p className="mt-4 text-lg">20 Nov - 30 Nov</p>
           <p className="mt-1 text-lg font-semibold">Réduction de <span className="bg-white text-black px-2 py-1 rounded">40%*</span> sur tous les produits.</p>
-          <Button size="lg" className="mt-8 bg-white text-black hover:bg-gray-200 font-bold group">
-            VOIR LES PRODUITS
-            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+          <Button size="lg" asChild className="mt-8 bg-white text-black hover:bg-gray-200 font-bold group">
+            <Link href="/products">
+              VOIR LES PRODUITS
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Link>
           </Button>
         </div>
       </div>
