@@ -1,19 +1,18 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Règle pour la collection 'products'
+    // Autorise la lecture publique pour la collection 'products'.
+    // N'importe qui (y compris votre serveur et les clients) peut lire la liste des produits.
     match /products/{productId} {
-      // Tout le monde peut lire les produits.
-      // C'est nécessaire pour que les visiteurs du site puissent les voir.
       allow read: if true;
 
-      // Seul le serveur (via les API routes sécurisées) peut écrire.
-      // On interdit toutes les écritures (create, update, delete) depuis le client.
-      allow write: if false;
+      // Seuls les utilisateurs authentifiés peuvent potentiellement écrire.
+      // La logique de votre API route vérifiera si l'utilisateur est bien l'administrateur.
+      allow write: if request.auth != null;
     }
-    
-    // Vous pouvez ajouter des règles pour d'autres collections ici.
+
+    // Ajoutez ici des règles pour d'autres collections si nécessaire.
     // Par exemple, pour une collection 'users' :
     // match /users/{userId} {
     //   allow read, write: if request.auth != null && request.auth.uid == userId;
