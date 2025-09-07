@@ -55,17 +55,15 @@ export default function AdminLayout({
 }) {
   return (
     <SidebarProvider>
-        <div className="flex h-screen bg-muted/40 text-foreground">
-            <AdminSidebar />
-            <SidebarInset>
-                <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-                   <SidebarTrigger />
-                </header>
-                <main className="flex-1 overflow-auto p-4 sm:px-6 sm:py-0">
-                    {children}
-                </main>
-            </SidebarInset>
-        </div>
+        <AdminSidebar />
+        <SidebarInset>
+            <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+                <SidebarTrigger />
+            </header>
+            <main className="flex-1 overflow-auto p-4 sm:px-6 sm:py-0">
+                {children}
+            </main>
+        </SidebarInset>
     </SidebarProvider>
   )
 }
