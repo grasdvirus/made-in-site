@@ -22,29 +22,25 @@ import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import { ProductDetailsClient } from "./product-details-client";
 import { notFound, useParams } from "next/navigation";
-import type { Product } from "@/app/admin/page";
+import type { Product } from "@/app/admin/products/page";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 
-const categoryNames: { [key: string]: string } = {
-  femmes: "Femmes",
-  hommes: "Hommes",
-  montres: "Montres",
-  sacs: "Sacs",
-  uncategorized: "Non classé"
-};
 
 export default function ProductDetailPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const categorySlug = Array.isArray(params.category) ? params.category[0] : params.category;
+  
   const [product, setProduct] = useState<Product | null>(null);
+  const [categoryName, setCategoryName] = useState("Catégorie");
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProductData = async () => {
-      if (!id) return;
+      if (!id || !categorySlug) return;
       setIsLoading(true);
       try {
         const docRef = doc(db, 'products', id);
@@ -54,6 +50,15 @@ export default function ProductDetailPage() {
           const fetchedProduct = { id: docSnap.id, ...docSnap.data() } as Product;
           setProduct(fetchedProduct);
 
+          // Fetch category name
+          const categoriesRef = collection(db, 'categories');
+          const catQuery = query(categoriesRef, where('slug', '==', categorySlug));
+          const catSnapshot = await getDocs(catQuery);
+          if (!catSnapshot.empty) {
+              setCategoryName(catSnapshot.docs[0].data().name);
+          }
+
+          // Fetch related products
           const productsRef = collection(db, 'products');
           const q = query(productsRef, where('category', '==', fetchedProduct.category), where('__name__', '!=', fetchedProduct.id));
           const snapshot = await getDocs(q);
@@ -74,7 +79,7 @@ export default function ProductDetailPage() {
     };
 
     fetchProductData();
-  }, [id]);
+  }, [id, categorySlug]);
 
   if (isLoading) {
     return (
@@ -88,7 +93,6 @@ export default function ProductDetailPage() {
     notFound();
   }
   
-  const categoryName = categoryNames[product.category] || "Catégorie";
 
   return (
     <div className="container mx-auto px-4 py-8 md:px-6">

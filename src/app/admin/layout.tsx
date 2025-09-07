@@ -1,16 +1,16 @@
 
 'use client'
 
-import { Header } from '@/components/layout/header';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from '@/components/ui/sidebar';
-import { Home, ShoppingCart, Package, Users, LineChart, Tag, Settings, Info } from 'lucide-react';
+import { Home, ShoppingCart, Package, Users, LineChart, Tag, Settings, Info, LayoutGrid } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const AdminSidebar = () => {
     const pathname = usePathname();
     const navItems = [
-        { href: '/admin', label: 'Produits', icon: Package },
+        { href: '/admin/products', label: 'Produits', icon: Package },
+        { href: '/admin/categories', label: 'Catégories', icon: LayoutGrid },
         { href: '/admin/settings/home', label: 'Réglages Accueil', icon: Settings },
     ];
 
@@ -18,15 +18,16 @@ const AdminSidebar = () => {
         <Sidebar>
             <SidebarContent>
                 <SidebarHeader>
-                    <Link href="/admin">
-                        <h2 className="text-lg font-semibold p-2">Tableau de bord</h2>
+                    <Link href="/admin/products" className="flex items-center gap-2">
+                         <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center text-xs text-muted-foreground">40x40</div>
+                        <h2 className="text-lg font-semibold">Tableau de bord</h2>
                     </Link>
                 </SidebarHeader>
                 <SidebarMenu>
                     {navItems.map((item) => (
                         <SidebarMenuItem key={item.label}>
                             <Link href={item.href}>
-                                <SidebarMenuButton isActive={pathname.startsWith(item.href)} variant="ghost">
+                                <SidebarMenuButton isActive={pathname === item.href} variant="ghost">
                                     <item.icon className="h-4 w-4" />
                                     <span>{item.label}</span>
                                 </SidebarMenuButton>

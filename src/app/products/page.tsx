@@ -1,4 +1,6 @@
 
+'use client'
+
 import {
     Carousel,
     CarouselContent,
@@ -9,15 +11,43 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import Link from "next/link"
-  
-const categories = [
-    { name: "FEMMES", image: "https://picsum.photos/800/600?random=1", hint: "woman fashion", href:"/products/femmes" },
-    { name: "MONTRES", image: "https://picsum.photos/800/600?random=2", hint: "luxury watch", href:"/products/montres" },
-    { name: "HOMMES", image: "https://picsum.photos/800/600?random=3", hint: "man fashion", href:"/products/hommes" },
-    { name: "SACS", image: "https://picsum.photos/800/600?random=4", hint: "handbag", href:"/products/sacs" }
-];
+import { useEffect, useState } from "react"
+import { collection, getDocs, query, orderBy } from "firebase/firestore"
+import { db } from "@/lib/firebase"
+import { Loader2 } from "lucide-react"
 
+interface Category {
+    id: string;
+    name: string;
+    slug: string;
+}
+  
 export default function ProductsPage() {
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            setIsLoading(true);
+            try {
+                const categoriesCol = collection(db, 'categories');
+                const q = query(categoriesCol, orderBy('name'));
+                const categoriesSnapshot = await getDocs(q);
+                const categoryList = categoriesSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                })) as Category[];
+                setCategories(categoryList);
+            } catch (error) {
+                console.error("Failed to fetch categories:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
     return (
       <div className="container mx-auto px-4 py-12 md:px-6 lg:py-16">
         <div className="max-w-3xl mx-auto text-center">
@@ -30,34 +60,49 @@ export default function ProductsPage() {
         </div>
   
         <div className="mt-12">
-            <Carousel
-                opts={{
-                    align: "start",
-                }}
-                className="w-full"
-            >
-                <CarouselContent>
-                {categories.map((category, index) => (
-                    <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                        <Link href={category.href}>
-                            <div className="p-1">
-                                <Card className="overflow-hidden">
-                                    <CardContent className="relative flex aspect-video items-center justify-center p-0">
-                                        <Image src={category.image} alt={category.name} fill className="object-cover" data-ai-hint={category.hint} />
-                                        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                                            <span className="text-2xl font-semibold text-white font-headline">{category.name}</span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        </Link>
-                    </CarouselItem>
-                ))}
-                </CarouselContent>
-                <CarouselPrevious className="block" />
-                <CarouselNext className="block" />
-            </Carousel>
+            {isLoading ? (
+                 <div className="flex justify-center items-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+            ) : categories.length === 0 ? (
+                <p className="text-center text-muted-foreground py-16">Aucune catégorie n'a été configurée.</p>
+            ) : (
+                <Carousel
+                    opts={{
+                        align: "start",
+                    }}
+                    className="w-full"
+                >
+                    <CarouselContent>
+                    {categories.map((category) => (
+                        <CarouselItem key={category.id} className="md:basis-1/2 lg:basis-1/3">
+                            <Link href={`/products/${category.slug}`}>
+                                <div className="p-1">
+                                    <Card className="overflow-hidden">
+                                        <CardContent className="relative flex aspect-video items-center justify-center p-0">
+                                            <Image 
+                                                src={`https://picsum.photos/seed/${category.slug}/800/600`} 
+                                                alt={category.name} 
+                                                fill 
+                                                className="object-cover" 
+                                                data-ai-hint={`${category.name} fashion`} 
+                                            />
+                                            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                                <span className="text-2xl font-semibold text-white font-headline">{category.name.toUpperCase()}</span>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            </Link>
+                        </CarouselItem>
+                    ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="block" />
+                    <CarouselNext className="block" />
+                </Carousel>
+            )}
         </div>
       </div>
     );
   }
+
