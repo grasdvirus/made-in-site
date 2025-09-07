@@ -19,10 +19,8 @@ import Image from "next/image";
 import Link from "next/link";
 import React from 'react';
 import { ProductDetailsClient } from "./product-details-client";
-import { getProduct, getProductsByCategory, Product } from "@/lib/products";
+import { getProduct, getProducts, getProductsByCategory, Product } from "@/lib/products";
 import { notFound } from "next/navigation";
-import { collection, getDoc, doc as firestoreDoc } from "firebase/firestore";
-import { db } from "@/lib/firebaseAdmin";
 
 const categoryNames: { [key: string]: string } = {
   femmes: "Femmes",
@@ -34,25 +32,11 @@ const categoryNames: { [key: string]: string } = {
 
 // This function fetches data at build time
 export async function generateStaticParams() {
-    const productsCol = db.collection('products');
-    const productSnapshot = await productsCol.get();
-    const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
-
+    const products = await getProducts();
     return products.map(product => ({
         category: product.category,
         id: product.id,
     }));
-}
-
-async function getProductData(id: string): Promise<Product | null> {
-    const docRef = firestoreDoc(db, "products", id);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() } as Product;
-    } else {
-        return null;
-    }
 }
 
 
@@ -62,7 +46,7 @@ export default async function ProductDetailPage({
   params: { category: string; id: string };
 }) {
   const { category, id } = params;
-  const product = await getProductData(id);
+  const product = await getProduct(id);
   
   if (!product) {
     notFound();
@@ -131,14 +115,4 @@ export default async function ProductDetailPage({
       </div>
     </div>
   );
-}
-
-// Re-add getProductsByCategory to use the admin SDK for build-time generation
-async function getProductsByCategory(category: string): Promise<Product[]> {
-    const productsCol = db.collection('products');
-    const snapshot = await productsCol.where('category', '==', category).get();
-    if (snapshot.empty) {
-        return [];
-    }
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
 }

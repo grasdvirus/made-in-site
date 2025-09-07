@@ -1,7 +1,6 @@
 // @/lib/products.ts
 
 import { db } from './firebaseAdmin'; // Use admin SDK on server-side
-import { collection, getDocs, getDoc, doc } from 'firebase/firestore';
 
 export interface Product {
     id: string;
@@ -47,18 +46,19 @@ export async function getProduct(id: string): Promise<Product | null> {
 
 
 /**
- * Fetches all products for a specific category from Firestore.
- * This function reads all products and then filters, suitable for server-side rendering.
+ * Fetches all products for a specific category from Firestore using the Admin SDK.
+ * This function is used for server-side rendering of category pages.
  */
 export async function getProductsByCategory(category: string): Promise<Product[]> {
-    // For server components, we fetch all and filter.
-    // This avoids complex queries and leverages caching if all products are fetched once.
-    const productsCol = collection(db, 'products');
-    const productSnapshot = await getDocs(productsCol);
-    const allProducts = productSnapshot.docs.map(doc => ({
+    const productsRef = db.collection('products');
+    const snapshot = await productsRef.where('category', '==', category).get();
+    
+    if (snapshot.empty) {
+        return [];
+    }
+    
+    return snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
     })) as Product[];
-    
-    return allProducts.filter(p => p.category === category);
 }
