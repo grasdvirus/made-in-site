@@ -1,22 +1,21 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 import * as admin from 'firebase-admin';
-import { firebaseConfig } from '@/lib/firebase';
-
-const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 
 // --- Firebase Admin Initialization ---
-// This ensures that Firebase is initialized only once.
+// This ensures that Firebase is initialized only once per server instance.
 if (!admin.apps.length) {
   try {
+    const serviceAccount: admin.ServiceAccount = {
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      // The private key must be formatted correctly.
+      // In your environment variables, replace all newline characters `\n` with `\\n`.
+      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+    };
+
     admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // The private key must be formatted correctly.
-        // In your environment variables, replace all newline characters `\n` with `\\n`.
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      }),
+      credential: admin.credential.cert(serviceAccount),
       databaseURL: `https://${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseio.com`,
       storageBucket: `${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.appspot.com`,
     });
@@ -27,6 +26,8 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 const auth = admin.auth();
+
+const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 
 
 // --- The main API handler ---
@@ -100,9 +101,14 @@ async function updateProducts(req: NextApiRequest, res: NextApiResponse) {
 
     // Add all new documents from the client state
     products.forEach((product: any) => {
-      if (!product.id || !product.name) { return; }
+      // Basic validation
+      if (!product.id || !product.name) { return; } 
+      
       const docRef = productsRef.doc(product.id);
-      const { id, ...productData } = product;
+      
+      // Separate the 'id' from the rest of the product data before setting.
+      const { id, ...productData } = product; 
+      
       batch.set(docRef, productData);
     });
 
@@ -117,3 +123,4 @@ async function updateProducts(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ message: `Failed to update products in Firestore: ${errorMessage}` });
   }
 }
+

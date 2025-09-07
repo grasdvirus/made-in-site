@@ -66,8 +66,8 @@ export default function AdminPage() {
     try {
         const response = await fetch('/api/admin/products');
         if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Failed to fetch products: ${errorText}`);
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Une erreur est survenue lors de la récupération des produits.');
         }
         const data = await response.json();
         setProducts(data);
@@ -88,12 +88,17 @@ export default function AdminPage() {
   useEffect(() => {
     if (!loading) {
         if (!user || user.email !== ADMIN_EMAIL) {
+            toast({
+                title: 'Accès non autorisé',
+                description: "Vous devez être administrateur pour accéder à cette page.",
+                variant: 'destructive',
+            });
             router.push('/');
         } else {
             fetchProducts();
         }
     }
-  }, [user, loading, router, fetchProducts]);
+  }, [user, loading, router, fetchProducts, toast]);
   
   // Re-organize products by category whenever products state changes
   useEffect(() => {
