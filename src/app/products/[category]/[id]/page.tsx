@@ -1,4 +1,6 @@
 
+'use client';
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,14 +19,13 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ProductDetailsClient } from "./product-details-client";
 import { notFound } from "next/navigation";
 import type { Product } from "@/app/admin/page";
-import { getFirebaseAdmin } from "@/lib/firebaseAdmin";
-
-
-const db = getFirebaseAdmin().firestore();
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import { Loader2 } from "lucide-react";
 
 const categoryNames: { [key: string]: string } = {
   femmes: "Femmes",
@@ -34,59 +35,64 @@ const categoryNames: { [key: string]: string } = {
   uncategorized: "Non classé"
 };
 
-
-// Server-side data fetching functions
-async function getProducts(): Promise<Product[]> {
-    const productsCol = db.collection('products');
-    const productSnapshot = await productsCol.get();
-    return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-}
-
-async function getProduct(id: string): Promise<Product | null> {
-    const docRef = db.collection('products').doc(id);
-    const docSnap = await docRef.get();
-    if (docSnap.exists) {
-        return { id: docSnap.id, ...docSnap.data() } as Product;
-    }
-    return null;
-}
-
-async function getProductsByCategory(category: string): Promise<Product[]> {
-    const productsRef = db.collection('products');
-    const snapshot = await productsRef.where('category', '==', category).get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-}
-
-
-// This function fetches data at build time
-export async function generateStaticParams() {
-    try {
-        const products = await getProducts();
-        return products.map(product => ({
-            category: product.category,
-            id: product.id,
-        }));
-    } catch (error) {
-        console.error("Failed to generate static params:", error);
-        return [];
-    }
-}
-
-
-export default async function ProductDetailPage({
+export default function ProductDetailPage({
   params,
 }: {
   params: { category: string; id: string };
 }) {
   const { category, id } = params;
-  const product = await getProduct(id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProductData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch the main product
+        const docRef = doc(db, 'products', id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const fetchedProduct = { id: docSnap.id, ...docSnap.data() } as Product;
+          setProduct(fetchedProduct);
+
+          // Fetch related products
+          const productsRef = collection(db, 'products');
+          const q = query(productsRef, where('category', '==', fetchedProduct.category));
+          const snapshot = await getDocs(q);
+          const related = snapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as Product))
+            .filter(p => p.id !== fetchedProduct.id);
+          setRelatedProducts(related);
+
+        } else {
+          setProduct(null); // Will trigger notFound()
+        }
+      } catch (error) {
+        console.error("Error fetching product data:", error);
+        setProduct(null); // Trigger notFound on error as well
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProductData();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[60vh]">
+        <Loader2 className="h-10 w-10 animate-spin" />
+      </div>
+    );
+  }
   
   if (!product) {
     notFound();
   }
   
-  const relatedProducts = (await getProductsByCategory(category)).filter((p) => p.id !== product.id);
-  const categoryName = categoryNames[category] || "Catégorie";
+  const categoryName = categoryNames[product.category] || "Catégorie";
 
   return (
     <div className="container mx-auto px-4 py-8 md:px-6">
@@ -101,7 +107,7 @@ export default async function ProductDetailPage({
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href={`/products/${category}`}>
+            <BreadcrumbLink href={`/products/${product.category}`}>
               {categoryName}
             </BreadcrumbLink>
           </BreadcrumbItem>
