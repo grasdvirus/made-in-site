@@ -81,7 +81,7 @@ export async function updateProducts(products: Product[]): Promise<{ success: bo
 
       // Revalidate paths to clear cache and show updated data
       revalidatePath('/admin');
-      revalidatePath('/products');
+      revalidatePath('/products', 'layout');
       
       return { success: true, message: 'Products updated successfully' };
 
