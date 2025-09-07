@@ -46,7 +46,7 @@ export async function updateProducts(products: Product[], token: string | null):
     const productsRef = db.collection('products');
 
     try {
-        // 1. Delete all existing documents
+        // 1. Get all existing document IDs to delete them
         const snapshot = await productsRef.get();
         if (!snapshot.empty) {
             snapshot.docs.forEach((doc) => {
@@ -56,19 +56,19 @@ export async function updateProducts(products: Product[], token: string | null):
 
         // 2. Add all new documents from the client state
         products.forEach((product) => {
-            const { id, name, price, description, category, imageUrl, hint } = product;
-             if (!id || !name || typeof price !== 'number') {
+            // Ensure product has the required fields before adding to batch
+            if (!product.id || !product.name || typeof product.price !== 'number') {
                 console.warn('Skipping invalid product data:', product);
-                return;
+                return; // skip this iteration
             }
             const docRef = productsRef.doc(product.id);
-             batch.set(docRef, {
-                name: name || '',
-                price: price || 0,
-                description: description || '',
-                category: category || 'uncategorized',
-                imageUrl: imageUrl || '',
-                hint: hint || ''
+            batch.set(docRef, {
+                name: product.name || '',
+                price: product.price || 0,
+                description: product.description || '',
+                category: product.category || 'uncategorized',
+                imageUrl: product.imageUrl || '',
+                hint: product.hint || ''
             });
         });
 
@@ -83,4 +83,3 @@ export async function updateProducts(products: Product[], token: string | null):
         return { success: false, message: `Failed to update products in Firestore: ${errorMessage}` };
     }
 }
-    
