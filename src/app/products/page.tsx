@@ -1,3 +1,4 @@
+
 import {
     Carousel,
     CarouselContent,
@@ -53,11 +54,10 @@ export default function ProductsPage() {
                     </CarouselItem>
                 ))}
                 </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
+                <CarouselPrevious className="block" />
+                <CarouselNext className="block" />
             </Carousel>
         </div>
       </div>
     );
   }
-  

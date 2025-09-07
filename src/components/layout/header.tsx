@@ -23,7 +23,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/hooks/use-cart';
+import { useCart } from '@/hooks/use-cart.tsx';
 
 const navLinks = [
   { href: '/', label: 'Accueil' },
@@ -98,26 +98,26 @@ export function Header() {
             )}
           </nav>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className="hidden md:flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             <Button variant="ghost" size="icon">
               <Search className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
               <Heart className="h-5 w-5" />
             </Button>
-            <div className="w-px h-6 bg-border"></div>
+            <div className="w-px h-6 bg-border mx-1"></div>
             <Button variant="ghost" asChild>
               <Link href="/cart">
                 <ShoppingBag className="h-5 w-5 mr-2" />
-                <span className="font-semibold">{itemCount > 0 ? `${total.toLocaleString('fr-FR')} FCFA` : '0 FCFA'} ({itemCount})</span>
+                <span className="font-semibold text-sm sm:text-base">{itemCount > 0 ? `${total.toLocaleString('fr-FR')} FCFA` : '0 FCFA'} ({itemCount})</span>
               </Link>
             </Button>
           </div>
           {user ? (
              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center space-x-2 pl-4">
+                    <Button variant="ghost" className="flex items-center space-x-2 pl-2 sm:pl-4">
                         <Avatar className="w-8 h-8">
                         {user.photoURL && <AvatarImage src={user.photoURL} alt="User Avatar" />}
                         <AvatarFallback>{user.displayName?.[0] || user.email?.[0]}</AvatarFallback>

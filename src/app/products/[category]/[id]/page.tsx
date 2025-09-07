@@ -55,11 +55,11 @@ export default function ProductDetailPage() {
           setProduct(fetchedProduct);
 
           const productsRef = collection(db, 'products');
-          const q = query(productsRef, where('category', '==', fetchedProduct.category));
+          const q = query(productsRef, where('category', '==', fetchedProduct.category), where('__name__', '!=', fetchedProduct.id));
           const snapshot = await getDocs(q);
           const related = snapshot.docs
-            .map(doc => ({ id: doc.id, ...doc.data() } as Product))
-            .filter(p => p.id !== fetchedProduct.id);
+            .map(doc => ({ id: doc.id, ...doc.data() } as Product));
+            
           setRelatedProducts(related);
 
         } else {
@@ -144,11 +144,10 @@ export default function ProductDetailPage() {
                 </CarouselItem>
             ))}
             </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
+            <CarouselPrevious className="block" />
+            <CarouselNext className="block" />
         </Carousel>
       </div>
     </div>
   );
 }
-    

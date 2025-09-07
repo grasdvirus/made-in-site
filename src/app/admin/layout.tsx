@@ -3,7 +3,7 @@
 
 import { Header } from '@/components/layout/header';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from '@/components/ui/sidebar';
-import { Home, ShoppingCart, Package, Users, LineChart } from 'lucide-react';
+import { Home, ShoppingCart, Package, Users, LineChart, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -11,6 +11,10 @@ const AdminSidebar = () => {
     const pathname = usePathname();
     const navItems = [
         { href: '/admin', label: 'Products', icon: Package },
+        { href: '/products/femmes', label: 'Femmes', icon: Tag },
+        { href: '/products/hommes', label: 'Hommes', icon: Tag },
+        { href: '/products/sacs', label: 'Sacs', icon: Tag },
+        { href: '/products/montres', label: 'Montres', icon: Tag },
     ];
 
     return (
@@ -25,7 +29,7 @@ const AdminSidebar = () => {
                     {navItems.map((item) => (
                         <SidebarMenuItem key={item.label}>
                             <Link href={item.href}>
-                                <SidebarMenuButton isActive={pathname.startsWith(item.href)}>
+                                <SidebarMenuButton isActive={pathname.startsWith(item.href)} variant="ghost">
                                     <item.icon className="h-4 w-4" />
                                     <span>{item.label}</span>
                                 </SidebarMenuButton>
