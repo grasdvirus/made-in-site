@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -22,6 +23,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { useCart } from '@/hooks/use-cart';
 
 const navLinks = [
   { href: '/', label: 'Accueil' },
@@ -40,6 +42,7 @@ const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 
 export function Header() {
   const { user } = useAuth();
+  const { total, itemCount } = useCart();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -107,7 +110,7 @@ export function Header() {
             <Button variant="ghost" asChild>
               <Link href="/cart">
                 <ShoppingBag className="h-5 w-5 mr-2" />
-                <span className="font-semibold">0 FCFA</span>
+                <span className="font-semibold">{itemCount > 0 ? `${total.toLocaleString('fr-FR')} FCFA` : '0 FCFA'} ({itemCount})</span>
               </Link>
             </Button>
           </div>

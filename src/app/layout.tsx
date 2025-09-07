@@ -5,6 +5,7 @@ import { Footer } from '@/components/layout/footer';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/hooks/use-auth';
 import { ClientLayout } from '@/components/layout/client-layout';
+import { CartProvider } from '@/hooks/use-cart.tsx';
 
 export const metadata: Metadata = {
   title: 'EzyRetail AI',
@@ -25,6 +26,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
+          <CartProvider>
             <ClientLayout>
                 <div className="bg-card shadow-lg overflow-hidden">
                     <Header />
@@ -33,6 +35,7 @@ export default function RootLayout({
                 </div>
                 <Toaster />
             </ClientLayout>
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

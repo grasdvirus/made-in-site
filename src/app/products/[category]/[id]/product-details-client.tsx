@@ -9,13 +9,15 @@ import type { Product } from "@/app/admin/page";
 import { Minus, Plus, Star } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { useCart } from "@/hooks/use-cart";
 
 export function ProductDetailsClient({ product }: { product: Product }) {
     const [quantity, setQuantity] = useState(1);
     const { toast } = useToast();
+    const { addItem } = useCart();
 
     const handleAddToCart = () => {
-        // In a real app, you'd add the product to the cart state
+        addItem(product, quantity);
         toast({
           title: "Produit ajouté au panier",
           description: `${product.name} (x${quantity}) a été ajouté à votre panier.`,
@@ -68,5 +70,3 @@ export function ProductDetailsClient({ product }: { product: Product }) {
       </div>
     )
 }
-
-    
