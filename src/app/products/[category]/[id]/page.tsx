@@ -20,27 +20,55 @@ import Link from "next/link";
 import React from 'react';
 import { ProductDetailsClient } from "./product-details-client";
 import { getProduct, getProductsByCategory, Product } from "@/lib/products";
+import { notFound } from "next/navigation";
+import { collection, getDoc, doc as firestoreDoc } from "firebase/firestore";
+import { db } from "@/lib/firebaseAdmin";
 
 const categoryNames: { [key: string]: string } = {
   femmes: "Femmes",
   hommes: "Hommes",
   montres: "Montres",
   sacs: "Sacs",
+  uncategorized: "Non classé"
 };
 
-export default function ProductDetailPage({
+// This function fetches data at build time
+export async function generateStaticParams() {
+    const productsCol = db.collection('products');
+    const productSnapshot = await productsCol.get();
+    const products = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
+
+    return products.map(product => ({
+        category: product.category,
+        id: product.id,
+    }));
+}
+
+async function getProductData(id: string): Promise<Product | null> {
+    const docRef = firestoreDoc(db, "products", id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Product;
+    } else {
+        return null;
+    }
+}
+
+
+export default async function ProductDetailPage({
   params,
 }: {
   params: { category: string; id: string };
 }) {
   const { category, id } = params;
-  const product = getProduct(id);
-
+  const product = await getProductData(id);
+  
   if (!product) {
-    return <div>Produit non trouvé</div>;
+    notFound();
   }
   
-  const relatedProducts = getProductsByCategory(category).filter((p) => p.id !== product.id);
+  const relatedProducts = (await getProductsByCategory(category)).filter((p) => p.id !== product.id);
   const categoryName = categoryNames[category] || "Catégorie";
 
   return (
@@ -81,7 +109,7 @@ export default function ProductDetailPage({
             <CarouselContent>
             {relatedProducts.map((relatedProduct) => (
                 <CarouselItem key={relatedProduct.id} className="md:basis-1/2 lg:basis-1/4">
-                    <Link href={`/products/${category}/${relatedProduct.id}`}>
+                    <Link href={`/products/${relatedProduct.category}/${relatedProduct.id}`}>
                         <Card className="overflow-hidden group">
                             <CardContent className="p-0">
                                 <div className="relative aspect-[4/5] overflow-hidden">
@@ -103,4 +131,14 @@ export default function ProductDetailPage({
       </div>
     </div>
   );
+}
+
+// Re-add getProductsByCategory to use the admin SDK for build-time generation
+async function getProductsByCategory(category: string): Promise<Product[]> {
+    const productsCol = db.collection('products');
+    const snapshot = await productsCol.where('category', '==', category).get();
+    if (snapshot.empty) {
+        return [];
+    }
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
 }

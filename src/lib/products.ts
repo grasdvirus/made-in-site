@@ -1,73 +1,64 @@
 // @/lib/products.ts
 
+import { db } from './firebaseAdmin'; // Use admin SDK on server-side
+import { collection, getDocs, getDoc, doc } from 'firebase/firestore';
+
 export interface Product {
     id: string;
     name: string;
     price: number;
     description: string;
-    category: 'femmes' | 'hommes' | 'montres' | 'sacs';
-    imageUrl: string; // Maintenant un chemin local, ex: /images/products/image.jpg
+    category: 'femmes' | 'hommes' | 'montres' | 'sacs' | 'uncategorized';
+    imageUrl: string; 
     hint?: string;
     width?: number;
     height?: number;
 }
 
-export const products: Product[] = [
-    { 
-        id: '1', 
-        name: "COMPLET HAUT ET PANTALON", 
-        price: 24000, 
-        description: "Un ensemble chic et élégant, parfait pour les occasions professionnelles ou les sorties.",
-        category: "femmes", 
-        imageUrl: "https://picsum.photos/600/800?random=1", 
-        hint: "fitted blazer" 
-    },
-    { 
-        id: '2', 
-        name: "Robe d'été florale", 
-        price: 35000, 
-        description: "Légère et aérée, cette robe est idéale pour les journées ensoleillées.",
-        category: "femmes", 
-        imageUrl: "https://picsum.photos/600/800?random=2", 
-        hint: "floral dress" 
-    },
-    { 
-        id: '3', 
-        name: "Montre Classique en Cuir", 
-        price: 75000, 
-        description: "Une montre intemporelle avec un bracelet en cuir véritable pour un look sophistiqué.",
-        category: "montres", 
-        imageUrl: "https://picsum.photos/600/800?random=3", 
-        hint: "classic watch" 
-    },
-    { 
-        id: '4', 
-        name: "Costume Trois-Pièces", 
-        price: 120000, 
-        description: "Incarnez l'élégance avec ce costume trois-pièces sur mesure.",
-        category: "hommes", 
-        imageUrl: "https://picsum.photos/600/800?random=4", 
-        hint: "men suit" 
-    },
-    { 
-        id: '5', 
-        name: "Sac à main en cuir", 
-        price: 55000, 
-        description: "Un accessoire indispensable, ce sac à main en cuir allie style et fonctionnalité.",
-        category: "sacs", 
-        imageUrl: "https://picsum.photos/600/800?random=5", 
-        hint: "leather handbag" 
-    },
-];
-
-export function getProducts(): Product[] {
-    return products;
+/**
+ * Fetches all products directly from Firestore using the Admin SDK.
+ * This function is intended for server-side API routes.
+ */
+export async function getProducts(): Promise<Product[]> {
+    const productsCol = db.collection('products');
+    const productSnapshot = await productsCol.get();
+    const productList = productSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    })) as Product[];
+    return productList;
 }
 
-export function getProduct(id: string): Product | undefined {
-    return products.find(p => p.id === id);
+/**
+ * Fetches a single product by its ID from Firestore using the Admin SDK.
+ * This function is intended for server-side API routes.
+ * @param id The ID of the product to fetch.
+ */
+export async function getProduct(id: string): Promise<Product | null> {
+    const docRef = db.collection('products').doc(id);
+    const docSnap = await docRef.get();
+
+    if (docSnap.exists) {
+        return { id: docSnap.id, ...docSnap.data() } as Product;
+    } else {
+        return null;
+    }
 }
 
-export function getProductsByCategory(category: string): Product[] {
-    return products.filter(p => p.category === category);
+
+/**
+ * Fetches all products for a specific category from Firestore.
+ * This function reads all products and then filters, suitable for server-side rendering.
+ */
+export async function getProductsByCategory(category: string): Promise<Product[]> {
+    // For server components, we fetch all and filter.
+    // This avoids complex queries and leverages caching if all products are fetched once.
+    const productsCol = collection(db, 'products');
+    const productSnapshot = await getDocs(productsCol);
+    const allProducts = productSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    })) as Product[];
+    
+    return allProducts.filter(p => p.category === category);
 }
