@@ -28,7 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getProducts, updateProducts } from '@/lib/actions/product-actions';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, writeBatch, doc, deleteDoc, query, orderBy } from 'firebase/firestore';
 
 
 // Hardcoded admin email
@@ -65,11 +66,14 @@ export default function AdminPage() {
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     try {
-        const result = await getProducts();
-        if (!result.success) {
-            throw new Error(result.error);
-        }
-        setProducts(result.data || []);
+        const productsCol = collection(db, 'products');
+        const q = query(productsCol, orderBy('name'));
+        const productSnapshot = await getDocs(q);
+        const productList = productSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        })) as Product[];
+        setProducts(productList);
     } catch (error: any) {
         console.error(error);
         toast({
@@ -113,18 +117,28 @@ export default function AdminPage() {
   }, [products]);
 
   const handleSaveChanges = async () => {
-    if (!user) {
+    if (!user || user.email !== ADMIN_EMAIL) {
         toast({ variant: "destructive", title: "Erreur", description: "Authentification requise." });
         return;
     }
     
     setIsSaving(true);
     try {
-        const result = await updateProducts(products);
+        const batch = writeBatch(db);
+        const productsRef = collection(db, 'products');
 
-        if (!result.success) {
-            throw new Error(result.error);
-        }
+        // First, delete all existing products to handle deletions.
+        const existingSnapshot = await getDocs(productsRef);
+        existingSnapshot.forEach(doc => batch.delete(doc.ref));
+
+        // Now, add all current products from state
+        products.forEach(product => {
+            const { id, ...productData } = product;
+            const docRef = doc(productsRef, id); // Use the existing ID
+            batch.set(docRef, productData);
+        });
+
+        await batch.commit();
 
         toast({
             title: "Succès",
@@ -361,3 +375,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
