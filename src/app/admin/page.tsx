@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { PlusCircle, Edit, Star, Truck, ImageIcon, LayoutGrid, Info, MessageSquare, Settings, Tag, Trash2, Upload, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Product, getProducts, updateProducts } from '@/lib/products';
+import type { Product } from '@/lib/products';
 import Image from 'next/image';
 import {
   Dialog,
@@ -44,12 +44,36 @@ export default function AdminPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [currentProduct, setCurrentProduct] = useState<Partial<Product>>({});
 
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    try {
+        const response = await fetch('/api/products');
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to fetch products: ${errorText}`);
+        }
+        const data = await response.json();
+        setProducts(data);
+    } catch (error) {
+        console.error(error);
+        toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: "Impossible de charger les produits.",
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
   // Initial data fetch
   useEffect(() => {
-    if (!loading && (!user || user.email !== ADMIN_EMAIL)) {
-      router.push('/');
-    } else if (user) {
-        fetchProducts();
+    if (!loading) {
+        if (!user || user.email !== ADMIN_EMAIL) {
+            router.push('/');
+        } else {
+            fetchProducts();
+        }
     }
   }, [user, loading, router]);
   
@@ -66,24 +90,6 @@ export default function AdminPage() {
     setProductsByCategory(byCategory);
   }, [products]);
 
-
-  const fetchProducts = async () => {
-    setIsLoading(true);
-    try {
-        const data = await getProducts();
-        setProducts(data);
-    } catch (error) {
-        console.error(error);
-        toast({
-            variant: "destructive",
-            title: "Erreur",
-            description: "Impossible de charger les produits.",
-        });
-    } finally {
-        setIsLoading(false);
-    }
-  };
-
   const handleSaveChanges = async () => {
     const token = await getToken();
     if (!token) {
@@ -93,11 +99,25 @@ export default function AdminPage() {
     
     setIsSaving(true);
     try {
-        await updateProducts(products, token);
+        const response = await fetch('/api/update-products', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ products })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to save products');
+        }
+
         toast({
             title: "Succès",
             description: "Les produits ont été enregistrés avec succès.",
         });
+        fetchProducts(); // Refresh data from server
     } catch (error: any) {
         console.error(error);
         toast({
@@ -128,10 +148,20 @@ export default function AdminPage() {
     setIsDialogOpen(true);
   };
   
-  const handleDialogInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setCurrentProduct(prev => ({ ...prev, [name]: name === 'price' ? Number(value) : value }));
+  const handleDialogInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | ChangeEvent<{ name?: string; value: unknown }>) => {
+    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+    const name = target.name;
+    const value = target.value;
+    
+    if (name) {
+        setCurrentProduct(prev => ({ ...prev, [name]: name === 'price' ? Number(value) : value }));
+    }
   };
+
+  const handleCategoryChange = (value: string) => {
+    setCurrentProduct(prev => ({...prev, category: value as Product['category']}));
+  }
+
 
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -185,7 +215,7 @@ export default function AdminPage() {
   }
 
 
-  if (loading || !user) {
+  if (loading || (!user && !isLoading)) {
     return (
       <div className="flex items-center justify-center h-full">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -193,7 +223,11 @@ export default function AdminPage() {
     );
   }
   
-  if (user.email !== ADMIN_EMAIL) {
+  if (user && user.email !== ADMIN_EMAIL) {
+    // This part is client-side, router.push is correct
+    useEffect(() => {
+        router.push('/');
+    }, [router]);
     return null;
   }
 
