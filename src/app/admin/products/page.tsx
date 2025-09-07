@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -48,6 +49,8 @@ export interface Product {
     category: string;
     imageUrl: string; 
     hint?: string;
+    sizes?: string;
+    colors?: string;
 }
 
 export interface Category {
@@ -80,64 +83,101 @@ function ProductForm({ product: initialProduct, categories, onSave, isSaving, is
     }
 
     return (
-        <div className="grid gap-6 p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                    <label htmlFor={`name-${product.id}`}>Nom du produit</label>
-                    <Input id={`name-${product.id}`} name="name" value={product.name || ''} onChange={handleInputChange} />
-                </div>
-                <div className="space-y-2">
-                    <label htmlFor={`price-${product.id}`}>Prix (FCFA)</label>
-                    <Input id={`price-${product.id}`} name="price" type="number" value={product.price || 0} onChange={handleInputChange} />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div className="space-y-2">
-                    <label htmlFor={`category-${product.id}`}>Catégorie</label>
-                    <Select name="category" value={product.category || ''} onValueChange={handleCategoryChange}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner une catégorie" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {categories.map(cat => (
-                                <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                 <div className="space-y-2">
-                    <label htmlFor={`hint-${product.id}`}>Hint (IA)</label>
-                    <Input id={`hint-${product.id}`} name="hint" value={product.hint || ''} onChange={handleInputChange} placeholder="Ex: 'red dress'"/>
-                </div>
-            </div>
-           
-            <div className="space-y-2">
-              <label htmlFor={`description-${product.id}`}>Description</label>
-              <Textarea id={`description-${product.id}`} name="description" value={product.description || ''} onChange={handleInputChange} />
-            </div>
-
-            <div className="space-y-2">
-              <label>Image</label>
-              <div className="flex items-center gap-4">
-                <Image src={product.imageUrl || DEFAULT_PRODUCT_IMAGE} alt="Aperçu" width={64} height={64} className="rounded-md object-cover bg-muted" />
-                <Button asChild variant="outline">
-                  <label htmlFor={`image-upload-${product.id}`} className="cursor-pointer flex items-center">
-                    { isUploading ? <Loader2 className="h-4 w-4 animate-spin mr-2"/> : <Upload className="h-4 w-4 mr-2" /> }
-                    Changer
-                    <Input id={`image-upload-${product.id}`} type="file" accept="image/*" className="sr-only" onChange={onImageUpload} disabled={isUploading}/>
-                  </label>
-                </Button>
+      <div className="p-4 bg-muted/20">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column */}
+              <div className="lg:col-span-2 space-y-8">
+                  <Card className="bg-card/50">
+                      <CardHeader>
+                          <CardTitle>Informations sur le produit</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                          <div className="space-y-2">
+                              <label htmlFor={`name-${product.id}`}>Nom du produit</label>
+                              <Input id={`name-${product.id}`} name="name" value={product.name || ''} onChange={handleInputChange} />
+                          </div>
+                          <div className="space-y-2">
+                              <label htmlFor={`description-${product.id}`}>Description</label>
+                              <Textarea id={`description-${product.id}`} name="description" value={product.description || ''} onChange={handleInputChange} rows={5}/>
+                          </div>
+                      </CardContent>
+                  </Card>
+                   <Card className="bg-card/50">
+                      <CardHeader>
+                          <CardTitle>Options du produit</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                          <div className="space-y-2">
+                              <label htmlFor={`sizes-${product.id}`}>Tailles disponibles (séparées par une virgule)</label>
+                              <Input id={`sizes-${product.id}`} name="sizes" value={product.sizes || ''} onChange={handleInputChange} placeholder="Ex: S, M, L, XL"/>
+                          </div>
+                           <div className="space-y-2">
+                              <label htmlFor={`colors-${product.id}`}>Couleurs disponibles (séparées par une virgule)</label>
+                              <Input id={`colors-${product.id}`} name="colors" value={product.colors || ''} onChange={handleInputChange} placeholder="Ex: Rouge, Bleu, Noir"/>
+                          </div>
+                      </CardContent>
+                  </Card>
               </div>
-            </div>
 
-            <div className="flex justify-end">
-                <Button onClick={() => onSave(product)} disabled={isSaving}>
-                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                Enregistrer
-                </Button>
-            </div>
+              {/* Right Column */}
+              <div className="space-y-8">
+                  <Card className="bg-card/50">
+                       <CardHeader>
+                          <CardTitle>Prix & Catégorie</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                           <div className="space-y-2">
+                              <label htmlFor={`price-${product.id}`}>Prix (FCFA)</label>
+                              <Input id={`price-${product.id}`} name="price" type="number" value={product.price || 0} onChange={handleInputChange} />
+                          </div>
+                          <div className="space-y-2">
+                              <label htmlFor={`category-${product.id}`}>Catégorie</label>
+                              <Select name="category" value={product.category || ''} onValueChange={handleCategoryChange}>
+                                  <SelectTrigger>
+                                      <SelectValue placeholder="Sélectionner une catégorie" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {categories.map(cat => (
+                                          <SelectItem key={cat.id} value={cat.slug}>{cat.name}</SelectItem>
+                                      ))}
+                                  </SelectContent>
+                              </Select>
+                          </div>
+                      </CardContent>
+                  </Card>
+                  <Card className="bg-card/50">
+                      <CardHeader>
+                          <CardTitle>Média</CardTitle>
+                      </CardHeader>
+                       <CardContent className="space-y-4">
+                          <div className="space-y-2">
+                            <label>Image</label>
+                            <div className="flex items-center gap-4">
+                              <Image src={product.imageUrl || DEFAULT_PRODUCT_IMAGE} alt="Aperçu" width={64} height={64} className="rounded-md object-cover bg-muted" />
+                              <Button asChild variant="outline">
+                                <label htmlFor={`image-upload-${product.id}`} className="cursor-pointer flex items-center">
+                                  { isUploading ? <Loader2 className="h-4 w-4 animate-spin mr-2"/> : <Upload className="h-4 w-4 mr-2" /> }
+                                  Changer
+                                  <Input id={`image-upload-${product.id}`} type="file" accept="image/*" className="sr-only" onChange={onImageUpload} disabled={isUploading}/>
+                                </label>
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                              <label htmlFor={`hint-${product.id}`}>Indice pour l'image (max 2 mots)</label>
+                              <Input id={`hint-${product.id}`} name="hint" value={product.hint || ''} onChange={handleInputChange} placeholder="Ex: 'red dress'"/>
+                          </div>
+                       </CardContent>
+                  </Card>
+              </div>
           </div>
+          <div className="flex justify-end mt-8">
+              <Button onClick={() => onSave(product)} disabled={isSaving}>
+              {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              Enregistrer les modifications
+              </Button>
+          </div>
+        </div>
     )
 }
 
@@ -196,13 +236,15 @@ export default function AdminProductsPage() {
 
     setIsSaving(true);
     try {
-        const finalProductData = {
+        const finalProductData: Omit<Product, 'id'> = {
             name: productData.name,
             price: productData.price || 0,
             description: productData.description || '',
             category: productData.category,
             imageUrl: productData.imageUrl || DEFAULT_PRODUCT_IMAGE,
             hint: productData.hint || '',
+            sizes: productData.sizes || '',
+            colors: productData.colors || '',
         };
 
         const docRef = doc(db, 'products', productData.id);
@@ -244,9 +286,9 @@ export default function AdminProductsPage() {
             const docRef = doc(db, 'products', productId!);
             await setDoc(docRef, { imageUrl: url }, { merge: true });
             setProducts(products.map(p => p.id === productId ? updatedProduct : p));
+            toast({ title: 'Image mise à jour.' });
         }
       }
-      toast({ title: 'Image téléversée.' });
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Erreur de téléversement', description: error.message });
     } finally {
@@ -276,6 +318,8 @@ export default function AdminProductsPage() {
         description: '',
         category: categories.length > 0 ? categories[0].slug : '',
         imageUrl: DEFAULT_PRODUCT_IMAGE,
+        sizes: '',
+        colors: '',
     });
     setEditingProductId('new');
   };
@@ -288,13 +332,13 @@ export default function AdminProductsPage() {
     <div className="flex-1 space-y-4 pt-6">
        <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Gestion des Produits</h2>
-           <Button onClick={handleAddNewClick}>
+           <Button onClick={handleAddNewClick} disabled={!!newProduct.id}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Ajouter un produit
           </Button>
       </div>
 
-      <Card>
+      <Card className="bg-card/60">
           <CardHeader>
               <CardTitle>Liste des produits ({products.length})</CardTitle>
               <CardDescription>
@@ -305,11 +349,14 @@ export default function AdminProductsPage() {
              {isLoading ? (
                   <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>
               ) : (
-                <Accordion type="single" collapsible value={editingProductId || ""} onValueChange={setEditingProductId}>
+                <Accordion type="single" collapsible value={editingProductId || ""} onValueChange={(value) => {
+                    setEditingProductId(value);
+                    if (!value) setNewProduct({}); // Clear new product form if accordion is closed
+                }}>
                     {/* Add New Product Form */}
                     {newProduct.id && (
-                        <AccordionItem value="new" className="border-primary border-2 rounded-lg mb-2">
-                             <AccordionTrigger className="p-4 hover:no-underline">
+                        <AccordionItem value="new" className="border-primary/50 border-2 rounded-lg mb-2 bg-card/70">
+                             <AccordionTrigger className="p-4 hover:no-underline [&>svg]:text-primary">
                                 <div className="flex items-center gap-4 text-primary">
                                     <PlusCircle className="h-5 w-5" />
                                     <span className="font-semibold text-lg">Ajouter un nouveau produit</span>
@@ -330,14 +377,16 @@ export default function AdminProductsPage() {
 
                     {/* Existing Products List */}
                     {products.map((product) => (
-                        <AccordionItem value={product.id} key={product.id}>
-                            <div className="flex items-center justify-between w-full p-4">
-                                <AccordionTrigger className="p-0 hover:no-underline flex-1">
+                        <AccordionItem value={product.id} key={product.id} className="border-b border-border/50">
+                            <div className="flex items-center w-full p-4 hover:bg-muted/10 rounded-t-md">
+                                <AccordionTrigger className="p-0 hover:no-underline flex-1 text-left">
                                     <div className="flex items-center gap-4">
                                         <GripVertical className="h-5 w-5 text-muted-foreground"/>
                                         <Image src={product.imageUrl} alt={product.name} width={40} height={40} className="rounded-md object-cover bg-muted" />
-                                        <span className="font-medium">{product.name}</span>
-                                        <span className="text-sm text-muted-foreground">{categories.find(c=>c.slug === product.category)?.name} - {product.price.toLocaleString('fr-FR')} FCFA</span>
+                                        <div className="flex-1">
+                                            <p className="font-medium">{product.name}</p>
+                                            <p className="text-sm text-muted-foreground">{categories.find(c=>c.slug === product.category)?.name} - {product.price.toLocaleString('fr-FR')} FCFA</p>
+                                        </div>
                                     </div>
                                 </AccordionTrigger>
                                 <div className="flex items-center gap-2 pl-4">
@@ -383,5 +432,7 @@ export default function AdminProductsPage() {
     </div>
   );
 }
+
+    
 
     

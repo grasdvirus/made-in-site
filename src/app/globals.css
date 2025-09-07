@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -34,7 +35,7 @@
     --shadow-inset-dark: inset 6px 6px 12px hsl(220, 20%, 88%);
   }
   .dark {
-    --background: 220 10% 15%;
+    --background: 220 10% 10%;
     --foreground: 0 0% 98%;
     --card: 220 10% 15%;
     --card-foreground: 0 0% 98%;
@@ -44,7 +45,7 @@
     --primary-foreground: 0 0% 100%;
     --secondary: 220 10% 25%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 220 10% 25%;
+    --muted: 220 10% 20%;
     --muted-foreground: 0 0% 63.9%;
     --accent: 220 10% 22%;
     --accent-foreground: 220 90% 60%;
@@ -150,8 +151,6 @@
   .card {
     @apply neumorphism-card;
   }
-
-  .btn-primary {
-     @apply neumorphism-button;
-  }
 }
+
+    
