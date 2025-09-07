@@ -25,7 +25,7 @@ const AdminSidebar = () => {
                 </SidebarHeader>
                 <SidebarMenu>
                      <SidebarMenuItem>
-                        <Link href="/" target="_blank">
+                        <Link href="/">
                             <SidebarMenuButton variant="ghost">
                                 <Info className="h-4 w-4" />
                                 <span>Voir le site</span>
@@ -58,7 +58,7 @@ export default function AdminLayout({
         <div className="flex h-screen bg-muted/40 text-foreground">
             <AdminSidebar />
             <div className="flex flex-col flex-1">
-                <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/95 backdrop-blur-sm px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+                <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
                    <SidebarTrigger className="sm:hidden" />
                 </header>
                 <main className="flex-1 overflow-auto p-4 sm:px-6 sm:py-0">
