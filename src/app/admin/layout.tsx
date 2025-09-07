@@ -24,6 +24,14 @@ const AdminSidebar = () => {
                     </Link>
                 </SidebarHeader>
                 <SidebarMenu>
+                     <SidebarMenuItem>
+                        <Link href="/" target="_blank">
+                            <SidebarMenuButton variant="ghost">
+                                <Info className="h-4 w-4" />
+                                <span>Voir le site</span>
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
                     {navItems.map((item) => (
                         <SidebarMenuItem key={item.label}>
                             <Link href={item.href}>
@@ -34,14 +42,6 @@ const AdminSidebar = () => {
                             </Link>
                         </SidebarMenuItem>
                     ))}
-                     <SidebarMenuItem>
-                        <Link href="/" target="_blank">
-                            <SidebarMenuButton variant="ghost">
-                                <Info className="h-4 w-4" />
-                                <span>Voir le site</span>
-                            </SidebarMenuButton>
-                        </Link>
-                    </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarContent>
         </Sidebar>
