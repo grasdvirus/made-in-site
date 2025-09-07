@@ -36,7 +36,7 @@ const categoryNames: { [key: string]: string } = {
 };
 
 export default function ProductDetailPage({
-  params,
+  params: { id },
 }: {
   params: { category: string; id: string };
 }) {
@@ -46,11 +46,11 @@ export default function ProductDetailPage({
 
   useEffect(() => {
     const fetchProductData = async () => {
-      if (!params.id) return;
+      if (!id) return;
       setIsLoading(true);
       try {
         // Fetch the main product
-        const docRef = doc(db, 'products', params.id);
+        const docRef = doc(db, 'products', id);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -78,7 +78,7 @@ export default function ProductDetailPage({
     };
 
     fetchProductData();
-  }, [params.id]);
+  }, [id]);
 
   if (isLoading) {
     return (

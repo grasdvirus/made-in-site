@@ -26,17 +26,17 @@ const categoryNames: { [key:string]: string } = {
     uncategorized: "Non classé"
 }
 
-export default function CategoryPage({ params }: { params: { category: string } }) {
+export default function CategoryPage({ params: { category } }: { params: { category: string } }) {
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const categoryName = categoryNames[params.category] || "Catégorie";
+    const categoryName = categoryNames[category] || "Catégorie";
 
     useEffect(() => {
         const fetchProducts = async () => {
             setIsLoading(true);
             try {
                 const productsRef = collection(db, 'products');
-                const q = query(productsRef, where('category', '==', params.category));
+                const q = query(productsRef, where('category', '==', category));
                 const snapshot = await getDocs(q);
                 
                 if (snapshot.empty) {
@@ -57,7 +57,7 @@ export default function CategoryPage({ params }: { params: { category: string } 
         };
 
         fetchProducts();
-    }, [params.category]);
+    }, [category]);
 
 
     return (
