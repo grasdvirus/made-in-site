@@ -8,17 +8,18 @@ import * as admin from 'firebase-admin';
 // You do NOT need to download a service account key file.
 
 const firebaseAdminConfig = {
-  // projectId is automatically inferred from the environment
+  // The projectId is automatically inferred from the environment
+  // in Firebase-managed environments like Firebase Studio.
 };
 
+// Check if the app is already initialized to prevent errors
 if (!admin.apps.length) {
-    try {
-        admin.initializeApp(firebaseAdminConfig);
-    } catch (error) {
-        console.error('Firebase Admin Initialization Error:', error);
-    }
+  try {
+    admin.initializeApp(firebaseAdminConfig);
+  } catch (error) {
+    console.error('Firebase Admin Initialization Error:', error);
+  }
 }
-
 
 const db = admin.firestore();
 const auth = admin.auth();
