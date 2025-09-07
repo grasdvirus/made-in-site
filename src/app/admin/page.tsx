@@ -3,7 +3,7 @@
 
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, ChangeEvent } from 'react';
+import { useEffect, useState, ChangeEvent, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,8 @@ import {
   DialogTrigger,
   DialogClose
 } from "@/components/ui/dialog"
+import { getProducts, updateProducts } from '@/lib/products';
+
 
 // Hardcoded admin email
 const ADMIN_EMAIL = 'grasdvirus@gmail.com';
@@ -56,15 +58,10 @@ export default function AdminPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [currentProduct, setCurrentProduct] = useState<Partial<Product>>({});
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     try {
-        const response = await fetch('/api/products');
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Failed to fetch products: ${errorText}`);
-        }
-        const data = await response.json();
+        const data = await getProducts();
         setProducts(data);
     } catch (error: any) {
         console.error(error);
@@ -76,7 +73,7 @@ export default function AdminPage() {
     } finally {
         setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   // Initial data fetch
   useEffect(() => {
@@ -87,7 +84,7 @@ export default function AdminPage() {
             fetchProducts();
         }
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, fetchProducts]);
   
   // Re-organize products by category whenever products state changes
   useEffect(() => {
@@ -111,25 +108,17 @@ export default function AdminPage() {
     
     setIsSaving(true);
     try {
-        const response = await fetch('/api/update-products', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ products })
-        });
+        const result = await updateProducts(products, token);
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to save products');
+        if (!result.success) {
+            throw new Error(result.message);
         }
 
         toast({
             title: "Succès",
             description: "Les produits ont été enregistrés avec succès.",
         });
-        fetchProducts(); // Refresh data from server
+        await fetchProducts(); // Refresh data from server
     } catch (error: any) {
         console.error(error);
         toast({
@@ -184,13 +173,15 @@ export default function AdminPage() {
     formData.append('file', file);
 
     try {
+      // We still use an API route for file upload as Server Actions have limitations with FormData.
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Échec du téléversement');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Échec du téléversement');
       }
 
       const { url } = await response.json();
@@ -212,10 +203,10 @@ export default function AdminPage() {
     }
 
     if (editingProduct) {
-      // Update existing product
+      // Update existing product in local state
       setProducts(products.map(p => p.id === editingProduct.id ? (currentProduct as Product) : p));
     } else {
-      // Add new product
+      // Add new product to local state
       setProducts([...products, currentProduct as Product]);
     }
     setIsDialogOpen(false);
@@ -335,7 +326,7 @@ export default function AdminPage() {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="category" className="text-right">Catégorie</label>
-              <select id="category" name="category" value={currentProduct.category || 'femmes'} onChange={handleDialogInputChange} className="col-span-3 border rounded-md p-2 bg-background">
+              <select id="category" name="category" value={currentProduct.category || 'femmes'} onChange={(e) => handleCategoryChange(e.target.value)} className="col-span-3 border rounded-md p-2 bg-background">
                   <option value="femmes">Femmes</option>
                   <option value="hommes">Hommes</option>
                   <option value="montres">Montres</option>
