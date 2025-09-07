@@ -40,17 +40,17 @@ export default function ProductDetailPage({
 }: {
   params: { category: string; id: string };
 }) {
-  const { category, id } = params;
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProductData = async () => {
+      if (!params.id) return;
       setIsLoading(true);
       try {
         // Fetch the main product
-        const docRef = doc(db, 'products', id);
+        const docRef = doc(db, 'products', params.id);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -78,7 +78,7 @@ export default function ProductDetailPage({
     };
 
     fetchProductData();
-  }, [id]);
+  }, [params.id]);
 
   if (isLoading) {
     return (

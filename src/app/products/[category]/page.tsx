@@ -27,17 +27,16 @@ const categoryNames: { [key:string]: string } = {
 }
 
 export default function CategoryPage({ params }: { params: { category: string } }) {
-    const { category } = params;
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const categoryName = categoryNames[category] || "Catégorie";
+    const categoryName = categoryNames[params.category] || "Catégorie";
 
     useEffect(() => {
         const fetchProducts = async () => {
             setIsLoading(true);
             try {
                 const productsRef = collection(db, 'products');
-                const q = query(productsRef, where('category', '==', category));
+                const q = query(productsRef, where('category', '==', params.category));
                 const snapshot = await getDocs(q);
                 
                 if (snapshot.empty) {
@@ -58,7 +57,7 @@ export default function CategoryPage({ params }: { params: { category: string } 
         };
 
         fetchProducts();
-    }, [category]);
+    }, [params.category]);
 
 
     return (
