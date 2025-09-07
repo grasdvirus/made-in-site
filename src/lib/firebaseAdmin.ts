@@ -7,7 +7,8 @@ if (!admin.apps.length) {
   try {
     // Utiliser les identifiants du projet pour une initialisation plus robuste
     admin.initializeApp({
-      credential: admin.credential.applicationDefault(),
+      // No credentials provided, relying on Application Default Credentials
+      // or other environment configurations for authentication.
       databaseURL: `https://${firebaseConfig.projectId}.firebaseio.com`,
       projectId: firebaseConfig.projectId,
       storageBucket: firebaseConfig.storageBucket,

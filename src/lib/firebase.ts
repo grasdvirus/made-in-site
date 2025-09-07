@@ -9,7 +9,7 @@ import { getStorage }from "firebase/storage";
 // Firebase project configuration to connect the app to your Firebase backend.
 // You can get this from the Firebase console:
 // (Project Settings > General > Your apps > Firebase SDK snippet > Config)
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyAunf47hCXKytT856H-_Z-0ZAe65QIFto4",
   authDomain: "made-in-site.firebaseapp.com",
   projectId: "made-in-site",
