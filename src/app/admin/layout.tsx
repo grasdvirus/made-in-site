@@ -3,18 +3,15 @@
 
 import { Header } from '@/components/layout/header';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from '@/components/ui/sidebar';
-import { Home, ShoppingCart, Package, Users, LineChart, Tag } from 'lucide-react';
+import { Home, ShoppingCart, Package, Users, LineChart, Tag, Settings, Info } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const AdminSidebar = () => {
     const pathname = usePathname();
     const navItems = [
-        { href: '/admin', label: 'Products', icon: Package },
-        { href: '/products/femmes', label: 'Femmes', icon: Tag },
-        { href: '/products/hommes', label: 'Hommes', icon: Tag },
-        { href: '/products/sacs', label: 'Sacs', icon: Tag },
-        { href: '/products/montres', label: 'Montres', icon: Tag },
+        { href: '/admin', label: 'Produits', icon: Package },
+        { href: '/admin/settings/home', label: 'Réglages Accueil', icon: Settings },
     ];
 
     return (
@@ -22,7 +19,7 @@ const AdminSidebar = () => {
             <SidebarContent>
                 <SidebarHeader>
                     <Link href="/admin">
-                        <h2 className="text-lg font-semibold p-2">Admin</h2>
+                        <h2 className="text-lg font-semibold p-2">Tableau de bord</h2>
                     </Link>
                 </SidebarHeader>
                 <SidebarMenu>
@@ -54,7 +51,7 @@ export default function AdminLayout({
             <div className="flex flex-col flex-1">
                 <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
                    <SidebarTrigger className="sm:hidden" />
-                   <h1 className="text-xl font-semibold">Dashboard</h1>
+                   <h1 className="text-xl font-semibold">Admin</h1>
                 </header>
                 <main className="flex-1 overflow-auto p-4 sm:px-6 sm:py-0">
                     {children}

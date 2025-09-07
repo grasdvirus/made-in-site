@@ -1,13 +1,21 @@
+
+'use client'
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Loader2 } from 'lucide-react';
 
-const categories = [
-    { name: "FEMMES", image: "https://picsum.photos/400/500?random=1", hint: "woman fashion", href: "/products/femmes" },
-    { name: "MONTRES", image: "https://picsum.photos/400/500?random=2", hint: "luxury watch", href: "/products/montres" },
-    { name: "HOMMES", image: "https://picsum.photos/400/500?random=3", hint: "man fashion", href: "/products/hommes" },
-    { name: "SACS", image: "https://picsum.photos/400/500?random=4", hint: "handbag", href: "/products/sacs" }
-];
+interface CategorySetting {
+    id: string;
+    name: string;
+    image: string; // URL de l'image
+    hint: string;
+    href: string;
+}
 
 const CategoryCard = ({ image, name, hint, href }: { image: string, name: string, hint: string, href: string }) => (
     <Link href={href} className="group relative overflow-hidden rounded-xl aspect-[4/5] block">
@@ -18,6 +26,35 @@ const CategoryCard = ({ image, name, hint, href }: { image: string, name: string
 );
 
 export function CategoriesSection() {
+    const [categories, setCategories] = useState<CategorySetting[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            setIsLoading(true);
+            try {
+                const docRef = doc(db, 'settings', 'homePage');
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // Assumant que les catégories sont stockées dans un champ `categories`
+                    setCategories(data.categories || []);
+                } else {
+                    console.log("No such document!");
+                    setCategories([]); // Mettre à vide si aucune config n'est trouvée
+                }
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+                setCategories([]); // Gérer l'erreur
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
     return (
         <section className="py-12 px-6 md:px-10">
             <div className="flex flex-col md:flex-row justify-between md:items-end mb-8 gap-4">
@@ -29,9 +66,18 @@ export function CategoriesSection() {
                     </Button>
                 </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {categories.map(cat => <CategoryCard key={cat.name} {...cat} />)}
-            </div>
+            {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+            ) : categories.length > 0 ? (
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {categories.map(cat => <CategoryCard key={cat.id} {...cat} />)}
+                </div>
+            ) : (
+                <p className="text-center text-muted-foreground py-16">Aucune catégorie à afficher pour le moment.</p>
+            )}
+           
             <Button asChild variant="outline" className="sm:hidden block mt-6 w-full rounded-full">
                 <Link href="/products">Toutes les catégories</Link>
             </Button>
