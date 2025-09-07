@@ -12,19 +12,19 @@ function initializeFirebaseAdmin() {
     return;
   }
 
-  const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  if (!serviceAccountString) {
-    throw new Error('La variable d\'environnement FIREBASE_SERVICE_ACCOUNT_JSON n\'est pas définie.');
-  }
-
   try {
-    const serviceAccount = JSON.parse(serviceAccountString);
+    const serviceAccount: admin.ServiceAccount = {
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+    };
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: admin.credential.cert(serviceAccount)
     });
   } catch (error: any) {
-    console.error('Erreur lors du parsing du JSON du compte de service ou de l\'initialisation de Firebase Admin:', error);
-    throw new Error('Le JSON du compte de service Firebase est mal formaté ou invalide.');
+    console.error('Firebase Admin Initialization Error:', error.stack);
+    // Throw an error that the client can understand
+    throw new Error('Échec de l\'initialisation du serveur Firebase.');
   }
 }
 
