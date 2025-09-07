@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Edit, Tag, Trash2, Upload, Loader2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Upload, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import {
   Dialog,
@@ -21,7 +21,6 @@ import {
   DialogTrigger,
   DialogClose
 } from "@/components/ui/dialog"
-import { getProducts, updateProducts } from '@/lib/products';
 import {
   Select,
   SelectContent,
@@ -61,11 +60,16 @@ export default function AdminPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [currentProduct, setCurrentProduct] = useState<Partial<Product>>({});
-
+  
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     try {
-        const data = await getProducts();
+        const response = await fetch('/api/admin/products');
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to fetch products: ${errorText}`);
+        }
+        const data = await response.json();
         setProducts(data);
     } catch (error: any) {
         console.error(error);
@@ -78,6 +82,7 @@ export default function AdminPage() {
         setIsLoading(false);
     }
   }, [toast]);
+
 
   // Initial data fetch
   useEffect(() => {
@@ -112,10 +117,19 @@ export default function AdminPage() {
     
     setIsSaving(true);
     try {
-        const result = await updateProducts(products, token);
+        const response = await fetch('/api/admin/products', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ products })
+        });
 
-        if (!result.success) {
-            throw new Error(result.message);
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "Une erreur inconnue est survenue.");
         }
 
         toast({
