@@ -1,24 +1,25 @@
 // src/lib/firebaseAdmin.ts
 import * as admin from 'firebase-admin';
 
-// This is a server-side only file.
+// Cette variable stocke l'instance de l'application pour éviter les réinitialisations.
+let app: admin.app.App;
 
-// **IMPORTANT**: This configuration relies on Application Default Credentials (ADC).
-// In Firebase Studio's environment, these credentials are automatically provided.
-// You do NOT need to download a service account key file.
-
-const firebaseAdminConfig = {
-  // The projectId is automatically inferred from the environment
-  // in Firebase-managed environments like Firebase Studio.
-};
-
-// Check if the app is already initialized to prevent errors
 if (!admin.apps.length) {
   try {
-    admin.initializeApp(firebaseAdminConfig);
+    // Initialise l'application Firebase Admin si elle ne l'est pas déjà.
+    // Cette méthode est robuste pour les environnements serverless comme Next.js.
+    app = admin.initializeApp({
+      // Dans l'environnement Firebase Studio, les credentials sont automatiquement
+      // fournis via les variables d'environnement.
+      // Vous n'avez pas besoin de configurer un `credential` manuellement.
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'made-in-site',
+    });
   } catch (error) {
     console.error('Firebase Admin Initialization Error:', error);
   }
+} else {
+  // Si l'application est déjà initialisée, récupère l'instance existante.
+  app = admin.app();
 }
 
 const db = admin.firestore();
