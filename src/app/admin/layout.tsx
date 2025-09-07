@@ -10,24 +10,22 @@ import { usePathname } from 'next/navigation';
 const AdminSidebar = () => {
     const pathname = usePathname();
     const navItems = [
-        { href: '/admin', label: 'Dashboard', icon: Home },
-        { href: '/admin/products', label: 'Products', icon: Package },
-        { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
-        { href: '/admin/customers', label: 'Customers', icon: Users },
-        { href: '/admin/analytics', label: 'Analytics', icon: LineChart },
+        { href: '/admin', label: 'Products', icon: Package },
     ];
 
     return (
         <Sidebar>
             <SidebarContent>
                 <SidebarHeader>
-                    <h2 className="text-lg font-semibold p-2">Admin</h2>
+                    <Link href="/admin">
+                        <h2 className="text-lg font-semibold p-2">Admin</h2>
+                    </Link>
                 </SidebarHeader>
                 <SidebarMenu>
                     {navItems.map((item) => (
                         <SidebarMenuItem key={item.label}>
                             <Link href={item.href}>
-                                <SidebarMenuButton isActive={pathname === item.href}>
+                                <SidebarMenuButton isActive={pathname.startsWith(item.href)}>
                                     <item.icon className="h-4 w-4" />
                                     <span>{item.label}</span>
                                 </SidebarMenuButton>
@@ -54,7 +52,7 @@ export default function AdminLayout({
                    <SidebarTrigger className="sm:hidden" />
                    <h1 className="text-xl font-semibold">Dashboard</h1>
                 </header>
-                <main className="flex-1 p-4 sm:px-6 sm:py-0">
+                <main className="flex-1 overflow-auto p-4 sm:px-6 sm:py-0">
                     {children}
                 </main>
             </div>

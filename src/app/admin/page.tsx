@@ -9,8 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Edit, Star, Truck, ImageIcon, LayoutGrid, Info, MessageSquare, Settings, Tag, Trash2, Upload, Loader2 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PlusCircle, Edit, Tag, Trash2, Upload, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import {
   Dialog,
@@ -23,6 +22,13 @@ import {
   DialogClose
 } from "@/components/ui/dialog"
 import { getProducts, updateProducts } from '@/lib/products';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 
 // Hardcoded admin email
@@ -37,8 +43,6 @@ export interface Product {
     category: 'femmes' | 'hommes' | 'montres' | 'sacs' | 'uncategorized';
     imageUrl: string; 
     hint?: string;
-    width?: number;
-    height?: number;
 }
 
 
@@ -149,14 +153,9 @@ export default function AdminPage() {
     setIsDialogOpen(true);
   };
   
-  const handleDialogInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | ChangeEvent<{ name?: string; value: unknown }>) => {
-    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
-    const name = target.name;
-    const value = target.value;
-    
-    if (name) {
-        setCurrentProduct(prev => ({ ...prev, [name]: name === 'price' ? Number(value) : value }));
-    }
+  const handleDialogInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setCurrentProduct(prev => ({ ...prev, [name]: name === 'price' ? Number(value) : value }));
   };
 
   const handleCategoryChange = (value: string) => {
@@ -173,7 +172,6 @@ export default function AdminPage() {
     formData.append('file', file);
 
     try {
-      // We still use an API route for file upload as Server Actions have limitations with FormData.
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
@@ -214,7 +212,7 @@ export default function AdminPage() {
 
   const handleDeleteProduct = (productId: string) => {
     setProducts(products.filter(p => p.id !== productId));
-    toast({ title: 'Produit supprimé localement. N\'oubliez pas de sauvegarder.' });
+    toast({ title: 'Produit supprimé localement.', description: "N'oubliez pas d'enregistrer les modifications." });
   }
 
 
@@ -225,86 +223,70 @@ export default function AdminPage() {
       </div>
     );
   }
-  
-  if (user && user.email !== ADMIN_EMAIL) {
-    // This part is client-side, router.push is correct
-    useEffect(() => {
-        router.push('/');
-    }, [router]);
-    return null;
-  }
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-       <Tabs defaultValue="products" className="space-y-4">
-        <div className="flex items-center justify-between">
-            <TabsList>
-                <TabsTrigger value="products"><Tag className="mr-2 h-4 w-4" />Produits</TabsTrigger>
-                <TabsTrigger value="reviews" disabled><Star className="mr-2 h-4 w-4" />Avis</TabsTrigger>
-                <TabsTrigger value="orders" disabled><Truck className="mr-2 h-4 w-4" />Commandes</TabsTrigger>
-                <TabsTrigger value="slides" disabled><ImageIcon className="mr-2 h-4 w-4" />Diapositives</TabsTrigger>
-            </TabsList>
-            <Button onClick={handleSaveChanges} disabled={isSaving}>
-              {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Enregistrer les modifications
-            </Button>
-        </div>
-        <TabsContent value="products" className="space-y-4">
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle>Gestion des Produits</CardTitle>
-                    <CardDescription>
-                        Ajoutez, modifiez et supprimez les produits de votre boutique.
-                    </CardDescription>
-                </div>
-                <Button onClick={() => handleOpenDialog()}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Ajouter un produit
-                </Button>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {isLoading ? (
-                       <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>
-                    ) : Object.keys(productsByCategory).length === 0 ? (
-                        <p className="text-muted-foreground text-center p-8">Aucun produit trouvé. Ajoutez votre premier produit !</p>
-                    ) : (
-                        Object.keys(productsByCategory).sort().map((category) => (
-                            <div key={category}>
-                                <h3 className="text-lg font-semibold my-4 capitalize">{category}</h3>
-                                <div className="border rounded-lg">
-                                  {productsByCategory[category].map(product => (
-                                      <div key={product.id} className="flex items-center justify-between p-3 border-b last:border-b-0">
-                                          <div className="flex items-center gap-4">
-                                            <Image 
-                                              src={product.imageUrl || DEFAULT_PRODUCT_IMAGE} 
-                                              alt={product.name} 
-                                              width={40} 
-                                              height={40} 
-                                              className="rounded-md object-cover bg-muted"
-                                            />
-                                            <span className="font-medium">{product.name}</span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            <Button variant="outline" size="sm" onClick={() => handleOpenDialog(product)}>
-                                                <Edit className="h-4 w-4 mr-2" />
-                                                Modifier
-                                            </Button>
-                                            <Button variant="destructive" size="sm" onClick={() => handleDeleteProduct(product.id)}>
-                                                <Trash2 className="h-4 w-4 mr-2" />
-                                                Supprimer
-                                            </Button>
-                                          </div>
-                                      </div>
-                                  ))}
+       <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">Gestion des Produits</h2>
+          <Button onClick={handleSaveChanges} disabled={isSaving || isLoading}>
+            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Enregistrer les modifications
+          </Button>
+      </div>
+
+      <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+              <CardTitle>Produits</CardTitle>
+              <CardDescription>
+                  Ajoutez, modifiez et supprimez les produits de votre boutique.
+              </CardDescription>
+          </div>
+          <Button onClick={() => handleOpenDialog()}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Ajouter un produit
+          </Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+              {isLoading ? (
+                  <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>
+              ) : Object.keys(productsByCategory).length === 0 ? (
+                  <p className="text-muted-foreground text-center p-8">Aucun produit trouvé. Ajoutez votre premier produit !</p>
+              ) : (
+                  Object.keys(productsByCategory).sort().map((category) => (
+                      <div key={category}>
+                          <h3 className="text-lg font-semibold my-4 capitalize">{category}</h3>
+                          <div className="border rounded-lg">
+                            {productsByCategory[category].map(product => (
+                                <div key={product.id} className="flex items-center justify-between p-3 border-b last:border-b-0">
+                                    <div className="flex items-center gap-4">
+                                      <Image 
+                                        src={product.imageUrl || DEFAULT_PRODUCT_IMAGE} 
+                                        alt={product.name} 
+                                        width={40} 
+                                        height={40} 
+                                        className="rounded-md object-cover bg-muted"
+                                      />
+                                      <span className="font-medium">{product.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Button variant="outline" size="sm" onClick={() => handleOpenDialog(product)}>
+                                          <Edit className="h-4 w-4 mr-2" />
+                                          Modifier
+                                      </Button>
+                                      <Button variant="destructive" size="sm" onClick={() => handleDeleteProduct(product.id)}>
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Supprimer
+                                      </Button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))
-                    )}
-                </CardContent>
-            </Card>
-        </TabsContent>
-      </Tabs>
+                            ))}
+                          </div>
+                      </div>
+                  ))
+              )}
+          </CardContent>
+      </Card>
       
       {/* Dialog for Add/Edit Product */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -326,12 +308,17 @@ export default function AdminPage() {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="category" className="text-right">Catégorie</label>
-              <select id="category" name="category" value={currentProduct.category || 'femmes'} onChange={(e) => handleCategoryChange(e.target.value)} className="col-span-3 border rounded-md p-2 bg-background">
-                  <option value="femmes">Femmes</option>
-                  <option value="hommes">Hommes</option>
-                  <option value="montres">Montres</option>
-                  <option value="sacs">Sacs</option>
-              </select>
+               <Select name="category" value={currentProduct.category || 'femmes'} onValueChange={handleCategoryChange}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Sélectionner une catégorie" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="femmes">Femmes</SelectItem>
+                    <SelectItem value="hommes">Hommes</SelectItem>
+                    <SelectItem value="montres">Montres</SelectItem>
+                    <SelectItem value="sacs">Sacs</SelectItem>
+                  </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <label htmlFor="description" className="text-right">Description</label>
@@ -366,4 +353,3 @@ export default function AdminPage() {
     </div>
   );
 }
-    

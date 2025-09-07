@@ -10,7 +10,7 @@ const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 export async function getProducts(): Promise<Product[]> {
     try {
         const productsCol = db.collection('products');
-        const productSnapshot = await productsCol.get();
+        const productSnapshot = await productsCol.orderBy('name').get();
         const productList = productSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
@@ -62,14 +62,9 @@ export async function updateProducts(products: Product[], token: string | null):
                 return; // skip this iteration
             }
             const docRef = productsRef.doc(product.id);
-            batch.set(docRef, {
-                name: product.name || '',
-                price: product.price || 0,
-                description: product.description || '',
-                category: product.category || 'uncategorized',
-                imageUrl: product.imageUrl || '',
-                hint: product.hint || ''
-            });
+            // Create a new object without the id to avoid storing it in the document
+            const { id, ...productData } = product;
+            batch.set(docRef, productData);
         });
 
         // 3. Commit the batch
