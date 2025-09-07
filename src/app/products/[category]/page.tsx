@@ -26,13 +26,15 @@ const categoryNames: { [key:string]: string } = {
     uncategorized: "Non classé"
 }
 
-export default function CategoryPage({ params: { category } }: { params: { category: string } }) {
+export default function CategoryPage({ params }: { params: { category: string } }) {
+    const { category } = params;
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const categoryName = categoryNames[category] || "Catégorie";
 
     useEffect(() => {
         const fetchProducts = async () => {
+            if (!category) return;
             setIsLoading(true);
             try {
                 const productsRef = collection(db, 'products');
@@ -50,7 +52,6 @@ export default function CategoryPage({ params: { category } }: { params: { categ
                 }
             } catch (error) {
                 console.error("Failed to fetch products:", error);
-                // Optionally, set an error state and display a message to the user
             } finally {
                 setIsLoading(false);
             }

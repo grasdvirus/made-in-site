@@ -36,10 +36,11 @@ const categoryNames: { [key: string]: string } = {
 };
 
 export default function ProductDetailPage({
-  params: { id },
+  params,
 }: {
   params: { category: string; id: string };
 }) {
+  const { id } = params;
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +50,6 @@ export default function ProductDetailPage({
       if (!id) return;
       setIsLoading(true);
       try {
-        // Fetch the main product
         const docRef = doc(db, 'products', id);
         const docSnap = await getDoc(docRef);
 
@@ -57,7 +57,6 @@ export default function ProductDetailPage({
           const fetchedProduct = { id: docSnap.id, ...docSnap.data() } as Product;
           setProduct(fetchedProduct);
 
-          // Fetch related products
           const productsRef = collection(db, 'products');
           const q = query(productsRef, where('category', '==', fetchedProduct.category));
           const snapshot = await getDocs(q);
@@ -67,11 +66,11 @@ export default function ProductDetailPage({
           setRelatedProducts(related);
 
         } else {
-          setProduct(null); // Will trigger notFound()
+          setProduct(null); 
         }
       } catch (error) {
         console.error("Error fetching product data:", error);
-        setProduct(null); // Trigger notFound on error as well
+        setProduct(null);
       } finally {
         setIsLoading(false);
       }
