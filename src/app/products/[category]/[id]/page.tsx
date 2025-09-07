@@ -21,25 +21,10 @@ import React from 'react';
 import { ProductDetailsClient } from "./product-details-client";
 import { notFound } from "next/navigation";
 import type { Product } from "@/app/admin/page";
-import * as admin from 'firebase-admin';
+import { getFirebaseAdmin } from "@/lib/firebaseAdmin";
 
-// --- Firebase Admin Initialization ---
-if (!admin.apps.length) {
-  try {
-    const serviceAccount: admin.ServiceAccount = {
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-    };
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-  } catch (error: any) {
-    console.error('Firebase Admin Initialization Error:', error.stack);
-  }
-}
 
-const db = admin.firestore();
+const db = getFirebaseAdmin().firestore();
 
 const categoryNames: { [key: string]: string } = {
   femmes: "Femmes",
