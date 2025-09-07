@@ -13,6 +13,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import type { Product } from "@/app/admin/page";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -26,11 +27,12 @@ const categoryNames: { [key:string]: string } = {
     uncategorized: "Non classé"
 }
 
-export default function CategoryPage({ params }: { params: { category: string } }) {
-    const { category } = params;
+export default function CategoryPage() {
+    const params = useParams();
+    const category = Array.isArray(params.category) ? params.category[0] : params.category;
     const [products, setProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const categoryName = categoryNames[category] || "Catégorie";
+    const categoryName = category ? categoryNames[category] || "Catégorie" : "Catégorie";
 
     useEffect(() => {
         const fetchProducts = async () => {

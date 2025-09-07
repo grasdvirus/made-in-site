@@ -21,7 +21,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import { ProductDetailsClient } from "./product-details-client";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import type { Product } from "@/app/admin/page";
 import { db } from "@/lib/firebase";
 import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
@@ -35,12 +35,9 @@ const categoryNames: { [key: string]: string } = {
   uncategorized: "Non classé"
 };
 
-export default function ProductDetailPage({
-  params,
-}: {
-  params: { category: string; id: string };
-}) {
-  const { id } = params;
+export default function ProductDetailPage() {
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
