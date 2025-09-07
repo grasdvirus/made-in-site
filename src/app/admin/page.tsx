@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { PlusCircle, Edit, Star, Truck, ImageIcon, LayoutGrid, Info, MessageSquare, Settings, Tag, Trash2, Upload, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Product } from '@/lib/products';
+import { Product, getProducts, updateProducts } from '@/lib/products';
 import Image from 'next/image';
 import {
   Dialog,
@@ -70,9 +70,7 @@ export default function AdminPage() {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-        const response = await fetch('/api/products');
-        if (!response.ok) throw new Error('Failed to fetch products');
-        const data = await response.json();
+        const data = await getProducts();
         setProducts(data);
     } catch (error) {
         console.error(error);
@@ -95,20 +93,7 @@ export default function AdminPage() {
     
     setIsSaving(true);
     try {
-        const response = await fetch('/api/update-products', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ products }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to save products');
-        }
-
+        await updateProducts(products, token);
         toast({
             title: "Succès",
             description: "Les produits ont été enregistrés avec succès.",
