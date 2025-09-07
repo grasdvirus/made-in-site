@@ -6,6 +6,8 @@ import * as admin from 'firebase-admin';
 // This ensures that Firebase is initialized only once per server instance.
 if (!admin.apps.length) {
   try {
+    // Ensure environment variables are loaded.
+    // In a Vercel/Next.js environment, these should be set in the project settings.
     const serviceAccount: admin.ServiceAccount = {
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
@@ -16,32 +18,38 @@ if (!admin.apps.length) {
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
-      databaseURL: `https://${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseio.com`,
-      storageBucket: `${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.appspot.com`,
     });
   } catch (error: any) {
     console.error('Firebase Admin Initialization Error in API route:', error.stack);
+    // We'll respond with an error if initialization fails, which is more informative
+    // than letting it crash on the next database call.
   }
 }
 
 const db = admin.firestore();
 const auth = admin.auth();
 
+// Hardcoded admin for this example, replace with your actual admin logic
 const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 
 
 // --- The main API handler ---
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
-    return getProducts(req, res);
-  }
+    // Pre-flight check to ensure Firebase initialized correctly
+    if (!admin.apps.length) {
+        return res.status(500).json({ message: 'Firebase Admin SDK has not been initialized.' });
+    }
+    
+    if (req.method === 'GET') {
+        return getProducts(req, res);
+    }
 
-  if (req.method === 'POST') {
-    return updateProducts(req, res);
-  }
+    if (req.method === 'POST') {
+        return updateProducts(req, res);
+    }
 
-  res.setHeader('Allow', ['GET', 'POST']);
-  res.status(405).end(`Method ${req.method} Not Allowed`);
+    res.setHeader('Allow', ['GET', 'POST']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
 }
 
 
@@ -123,5 +131,3 @@ async function updateProducts(req: NextApiRequest, res: NextApiResponse) {
     return res.status(500).json({ message: `Failed to update products in Firestore: ${errorMessage}` });
   }
 }
-
-    
