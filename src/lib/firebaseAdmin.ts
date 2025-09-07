@@ -2,22 +2,18 @@
 import * as admin from 'firebase-admin';
 import { firebaseConfig } from '@/lib/firebase';
 
-// Cette fonction garantit que Firebase est initialisé une seule fois.
 if (!admin.apps.length) {
   try {
-    // Utiliser les identifiants du projet pour une initialisation plus robuste
     admin.initializeApp({
-      // No credentials provided, relying on Application Default Credentials
-      // or other environment configurations for authentication.
-      databaseURL: `https://${firebaseConfig.projectId}.firebaseio.com`,
+      // Use the project-specific details from the client config
+      // and rely on Application Default Credentials for authentication.
+      // This is a more robust way to initialize in various cloud environments.
       projectId: firebaseConfig.projectId,
       storageBucket: firebaseConfig.storageBucket,
     });
     console.log('Firebase Admin SDK initialized successfully.');
   } catch (error: any) {
-    console.error('Firebase Admin Initialization Error:', error);
-    // Lancer une erreur plus spécifique pour faciliter le débogage.
-    throw new Error(`Failed to initialize Firebase Admin SDK: ${error.message}`);
+    console.error('Firebase Admin Initialization Error:', error.message);
   }
 }
 
