@@ -331,21 +331,21 @@ export default function AdminProductsPage() {
                     {/* Existing Products List */}
                     {products.map((product) => (
                         <AccordionItem value={product.id} key={product.id}>
-                            <AccordionTrigger className="p-4 hover:no-underline">
-                                <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center justify-between w-full p-4">
+                                <AccordionTrigger className="p-0 hover:no-underline flex-1">
                                     <div className="flex items-center gap-4">
                                         <GripVertical className="h-5 w-5 text-muted-foreground"/>
                                         <Image src={product.imageUrl} alt={product.name} width={40} height={40} className="rounded-md object-cover bg-muted" />
                                         <span className="font-medium">{product.name}</span>
                                         <span className="text-sm text-muted-foreground">{categories.find(c=>c.slug === product.category)?.name} - {product.price.toLocaleString('fr-FR')} FCFA</span>
                                     </div>
-                                    <div className="flex items-center gap-2 pr-4">
-                                        <Button variant="ghost" size="icon" className="hover:bg-destructive/10" onClick={(e) => { e.stopPropagation(); setProductToDelete(product); }}>
-                                            <Trash2 className="h-4 w-4 text-destructive" />
-                                        </Button>
-                                    </div>
+                                </AccordionTrigger>
+                                <div className="flex items-center gap-2 pl-4">
+                                    <Button variant="ghost" size="icon" className="hover:bg-destructive/10" onClick={() => setProductToDelete(product)}>
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                    </Button>
                                 </div>
-                            </AccordionTrigger>
+                            </div>
                             <AccordionContent>
                                 <ProductForm 
                                     product={product}
