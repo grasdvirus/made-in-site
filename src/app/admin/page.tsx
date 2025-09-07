@@ -66,7 +66,7 @@ export default function AdminPage() {
     try {
         const response = await fetch('/api/admin/products');
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await response.json().catch(() => ({ message: 'Le serveur a renvoyé une réponse invalide.' }));
             throw new Error(errorData.message || 'Une erreur est survenue lors de la récupération des produits.');
         }
         const data = await response.json();

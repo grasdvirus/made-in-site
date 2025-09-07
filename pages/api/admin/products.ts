@@ -3,27 +3,27 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import * as admin from 'firebase-admin';
 
 // --- Firebase Admin Initialization ---
-// This ensures that Firebase is initialized only once per server instance.
-if (!admin.apps.length) {
-  try {
-    const serviceAccount: admin.ServiceAccount = {
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      // The private key must be formatted correctly.
-      // In your environment variables, replace all newline characters `\n` with `\\n`.
-      privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-    };
+// This function ensures that Firebase is initialized only once.
+function initializeFirebaseAdmin() {
+  if (admin.apps.length > 0) {
+    return admin.app();
+  }
 
-    admin.initializeApp({
+  const serviceAccountString = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  if (!serviceAccountString) {
+    throw new Error('La variable d\'environnement FIREBASE_SERVICE_ACCOUNT_JSON n\'est pas définie.');
+  }
+
+  try {
+    const serviceAccount = JSON.parse(serviceAccountString);
+    return admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
   } catch (error: any) {
-    console.error('Firebase Admin Initialization Error in API route:', error.stack);
+    console.error('Erreur lors du parsing du JSON du compte de service ou de l\'initialisation de Firebase Admin:', error);
+    throw new Error('Le JSON du compte de service Firebase est mal formaté ou invalide.');
   }
 }
-
-const db = admin.firestore();
-const auth = admin.auth();
 
 // Hardcoded admin for this example, replace with your actual admin logic
 const ADMIN_EMAIL = 'grasdvirus@gmail.com';
@@ -31,9 +31,11 @@ const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 
 // --- The main API handler ---
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    // Pre-flight check to ensure Firebase initialized correctly
-    if (!admin.apps.length) {
-        return res.status(500).json({ message: 'Firebase Admin SDK has not been initialized.' });
+    try {
+      initializeFirebaseAdmin();
+    } catch (error: any) {
+      console.error("Échec de l'initialisation de Firebase Admin:", error.message);
+      return res.status(500).json({ message: "Échec de l'initialisation du serveur Firebase.", error: error.message });
     }
     
     if (req.method === 'GET') {
@@ -52,6 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 // --- GET Products ---
 async function getProducts(req: NextApiRequest, res: NextApiResponse) {
   try {
+    const db = admin.firestore();
     const productsCol = db.collection('products');
     const productSnapshot = await productsCol.orderBy('name').get();
     const productList = productSnapshot.docs.map(doc => ({
@@ -68,6 +71,9 @@ async function getProducts(req: NextApiRequest, res: NextApiResponse) {
 
 // --- POST (Update) Products ---
 async function updateProducts(req: NextApiRequest, res: NextApiResponse) {
+  const auth = admin.auth();
+  const db = admin.firestore();
+
   // 1. Verify Authentication
   const { authorization } = req.headers;
   if (!authorization || !authorization.startsWith('Bearer ')) {
