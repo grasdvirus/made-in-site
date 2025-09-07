@@ -29,12 +29,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { db } from '@/lib/firebase';
-import { collection, getDocs, writeBatch, doc, deleteDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, writeBatch, doc, deleteDoc, query, orderBy, setDoc } from 'firebase/firestore';
 
 
 // Hardcoded admin email
 const ADMIN_EMAIL = 'grasdvirus@gmail.com';
-const DEFAULT_PRODUCT_IMAGE = '/placeholder.svg';
+const DEFAULT_PRODUCT_IMAGE = 'https://placehold.co/400x500/EFEFEF/333333?text=Image';
 
 export interface Product {
     id: string;
@@ -57,6 +57,7 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   // States for the "Add/Edit Product" Dialog
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -117,45 +118,45 @@ export default function AdminPage() {
   }, [products]);
 
   const handleSaveChanges = async () => {
-    if (!user || user.email !== ADMIN_EMAIL) {
-        toast({ variant: "destructive", title: "Erreur", description: "Authentification requise." });
+    if (!currentProduct || !currentProduct.id || !currentProduct.name || !currentProduct.category) {
+        toast({ variant: 'destructive', title: 'Champs requis', description: 'Le nom et la catégorie sont obligatoires.' });
         return;
     }
-    
+
     setIsSaving(true);
     try {
-        const batch = writeBatch(db);
-        const productsRef = collection(db, 'products');
+        const productData = {
+            name: currentProduct.name,
+            price: currentProduct.price || 0,
+            description: currentProduct.description || '',
+            category: currentProduct.category,
+            imageUrl: currentProduct.imageUrl || DEFAULT_PRODUCT_IMAGE,
+            hint: currentProduct.hint || '',
+        };
 
-        // First, delete all existing products to handle deletions.
-        const existingSnapshot = await getDocs(productsRef);
-        existingSnapshot.forEach(doc => batch.delete(doc.ref));
-
-        // Now, add all current products from state
-        products.forEach(product => {
-            const { id, ...productData } = product;
-            const docRef = doc(productsRef, id); // Use the existing ID
-            batch.set(docRef, productData);
-        });
-
-        await batch.commit();
+        const docRef = doc(db, 'products', currentProduct.id);
+        await setDoc(docRef, productData, { merge: true });
 
         toast({
             title: "Succès",
-            description: "Les produits ont été enregistrés avec succès.",
+            description: `Le produit "${productData.name}" a été enregistré.`,
         });
+
         await fetchProducts(); // Refresh data from server
+        setIsDialogOpen(false); // Close dialog on success
+
     } catch (error: any) {
         console.error(error);
         toast({
             variant: "destructive",
             title: "Erreur",
-            description: `Échec de l'enregistrement des produits : ${error.message}`,
+            description: `Échec de l'enregistrement du produit : ${error.message}`,
         });
     } finally {
         setIsSaving(false);
     }
   };
+
 
   const handleOpenDialog = (product: Product | null = null) => {
     if (product) {
@@ -216,26 +217,26 @@ export default function AdminPage() {
   };
 
 
-  const handleSaveProduct = () => {
-    if (!currentProduct.name || !currentProduct.category) {
-        toast({ variant: 'destructive', title: 'Champs requis', description: 'Le nom et la catégorie sont obligatoires.' });
-        return;
+  const handleDeleteProduct = async (productId: string) => {
+    if (!user || user.email !== ADMIN_EMAIL) {
+      toast({ variant: "destructive", title: "Erreur", description: "Authentification requise." });
+      return;
     }
 
-    if (editingProduct) {
-      // Update existing product in local state
-      setProducts(products.map(p => p.id === editingProduct.id ? (currentProduct as Product) : p));
-    } else {
-      // Add new product to local state
-      setProducts([...products, currentProduct as Product]);
+    setIsSaving(true);
+    try {
+        const docRef = doc(db, 'products', productId);
+        await deleteDoc(docRef);
+        toast({ title: 'Produit Supprimé', description: 'Le produit a été supprimé de la base de données.' });
+        await fetchProducts(); // Refresh list
+    } catch (error: any) {
+        console.error("Delete error:", error);
+        toast({ variant: "destructive", title: "Erreur de suppression", description: error.message });
+    } finally {
+        setIsSaving(false);
+        setProductToDelete(null); // Close confirmation dialog
     }
-    setIsDialogOpen(false);
   };
-
-  const handleDeleteProduct = (productId: string) => {
-    setProducts(products.filter(p => p.id !== productId));
-    toast({ title: 'Produit supprimé localement.', description: "N'oubliez pas d'enregistrer les modifications." });
-  }
 
 
   if (loading || (!user && !isLoading)) {
@@ -250,10 +251,7 @@ export default function AdminPage() {
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
        <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Gestion des Produits</h2>
-          <Button onClick={handleSaveChanges} disabled={isSaving || isLoading}>
-            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            Enregistrer les modifications
-          </Button>
+          
       </div>
 
       <Card>
@@ -296,7 +294,7 @@ export default function AdminPage() {
                                           <Edit className="h-4 w-4 mr-2" />
                                           Modifier
                                       </Button>
-                                      <Button variant="destructive" size="sm" onClick={() => handleDeleteProduct(product.id)}>
+                                      <Button variant="destructive" size="sm" onClick={() => setProductToDelete(product)}>
                                           <Trash2 className="h-4 w-4 mr-2" />
                                           Supprimer
                                       </Button>
@@ -316,7 +314,7 @@ export default function AdminPage() {
           <DialogHeader>
             <DialogTitle>{editingProduct ? 'Modifier le produit' : 'Ajouter un nouveau produit'}</DialogTitle>
             <DialogDescription>
-                Remplissez les détails ci-dessous. Les modifications sont locales jusqu'à ce que vous enregistriez.
+                Remplissez les détails ci-dessous. Cliquez sur "Enregistrer" pour sauvegarder.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -368,7 +366,29 @@ export default function AdminPage() {
             <DialogClose asChild>
                 <Button type="button" variant="secondary">Annuler</Button>
             </DialogClose>
-            <Button type="button" onClick={handleSaveProduct}>Enregistrer</Button>
+            <Button type="button" onClick={handleSaveChanges} disabled={isSaving}>
+              {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+       {/* Confirmation Dialog for Delete */}
+       <Dialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir supprimer le produit "{productToDelete?.name}" ? Cette action est irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+             <Button variant="secondary" onClick={() => setProductToDelete(null)}>Annuler</Button>
+             <Button variant="destructive" onClick={() => productToDelete && handleDeleteProduct(productToDelete.id)} disabled={isSaving}>
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Supprimer
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
