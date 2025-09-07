@@ -19,8 +19,9 @@ import Image from "next/image";
 import Link from "next/link";
 import React from 'react';
 import { ProductDetailsClient } from "./product-details-client";
-import { getProduct, getProducts, getProductsByCategory, Product } from "@/lib/products";
 import { notFound } from "next/navigation";
+import { db } from "@/lib/firebaseAdmin";
+import type { Product } from "@/app/admin/page";
 
 const categoryNames: { [key: string]: string } = {
   femmes: "Femmes",
@@ -30,13 +31,42 @@ const categoryNames: { [key: string]: string } = {
   uncategorized: "Non classé"
 };
 
+
+// Server-side data fetching functions
+async function getProducts(): Promise<Product[]> {
+    const productsCol = db.collection('products');
+    const productSnapshot = await productsCol.get();
+    return productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+}
+
+async function getProduct(id: string): Promise<Product | null> {
+    const docRef = db.collection('products').doc(id);
+    const docSnap = await docRef.get();
+    if (docSnap.exists) {
+        return { id: docSnap.id, ...docSnap.data() } as Product;
+    }
+    return null;
+}
+
+async function getProductsByCategory(category: string): Promise<Product[]> {
+    const productsRef = db.collection('products');
+    const snapshot = await productsRef.where('category', '==', category).get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+}
+
+
 // This function fetches data at build time
 export async function generateStaticParams() {
-    const products = await getProducts();
-    return products.map(product => ({
-        category: product.category,
-        id: product.id,
-    }));
+    try {
+        const products = await getProducts();
+        return products.map(product => ({
+            category: product.category,
+            id: product.id,
+        }));
+    } catch (error) {
+        console.error("Failed to generate static params:", error);
+        return [];
+    }
 }
 
 
@@ -116,3 +146,5 @@ export default async function ProductDetailPage({
     </div>
   );
 }
+
+    

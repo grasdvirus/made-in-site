@@ -1,7 +1,8 @@
+
 // pages/api/products.ts
 import { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '@/lib/firebaseAdmin'; // Utilise l'instance Admin SDK corrigée
-import type { Product } from '@/lib/products';
+import { db } from '@/lib/firebaseAdmin'; 
+import type { Product } from '@/app/admin/page';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -27,3 +28,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 }
+
+    

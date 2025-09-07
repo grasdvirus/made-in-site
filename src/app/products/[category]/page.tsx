@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Breadcrumb,
@@ -10,7 +11,9 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import { getProductsByCategory, Product } from "@/lib/products";
+import { db } from "@/lib/firebaseAdmin";
+import type { Product } from "@/app/admin/page";
+
 
 const categoryNames: { [key:string]: string } = {
     femmes: "Femmes",
@@ -18,6 +21,20 @@ const categoryNames: { [key:string]: string } = {
     montres: "Montres",
     sacs: "Sacs",
     uncategorized: "Non classé"
+}
+
+async function getProductsByCategory(category: string): Promise<Product[]> {
+    const productsRef = db.collection('products');
+    const snapshot = await productsRef.where('category', '==', category).get();
+    
+    if (snapshot.empty) {
+        return [];
+    }
+    
+    return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    })) as Product[];
 }
 
 export async function generateStaticParams() {
@@ -79,3 +96,5 @@ export default async function CategoryPage({ params }: { params: { category: str
         </div>
     )
 }
+
+    

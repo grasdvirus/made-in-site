@@ -1,10 +1,11 @@
+
 'use client'
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Product } from "@/lib/products";
+import type { Product } from "@/app/admin/page";
 import { Minus, Plus, Star } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -67,3 +68,5 @@ export function ProductDetailsClient({ product }: { product: Product }) {
       </div>
     )
 }
+
+    

@@ -11,7 +11,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { PlusCircle, Edit, Star, Truck, ImageIcon, LayoutGrid, Info, MessageSquare, Settings, Tag, Trash2, Upload, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Product } from '@/lib/products';
 import Image from 'next/image';
 import {
   Dialog,
@@ -27,6 +26,19 @@ import {
 // Hardcoded admin email
 const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 const DEFAULT_PRODUCT_IMAGE = '/placeholder.svg';
+
+export interface Product {
+    id: string;
+    name: string;
+    price: number;
+    description: string;
+    category: 'femmes' | 'hommes' | 'montres' | 'sacs' | 'uncategorized';
+    imageUrl: string; 
+    hint?: string;
+    width?: number;
+    height?: number;
+}
+
 
 export default function AdminPage() {
   const { user, loading, getToken } = useAuth();
@@ -54,12 +66,12 @@ export default function AdminPage() {
         }
         const data = await response.json();
         setProducts(data);
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
         toast({
             variant: "destructive",
             title: "Erreur",
-            description: "Impossible de charger les produits.",
+            description: `Impossible de charger les produits. ${error.message}`,
         });
     } finally {
         setIsLoading(false);
@@ -363,3 +375,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    

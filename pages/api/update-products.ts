@@ -1,8 +1,8 @@
+
 // pages/api/update-products.ts
 import { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '@/lib/firebaseAdmin';
-import { getAuth } from 'firebase-admin/auth';
-import type { Product } from '@/lib/products';
+import { db, auth } from '@/lib/firebaseAdmin';
+import type { Product } from '@/app/admin/page';
 
 const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 
@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const token = authorization.split('Bearer ')[1];
     
     try {
-        const decodedToken = await getAuth().verifyIdToken(token);
+        const decodedToken = await auth.verifyIdToken(token);
         if (decodedToken.email !== ADMIN_EMAIL) {
             return res.status(403).json({ error: 'Forbidden: User is not an admin' });
         }
@@ -77,3 +77,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(500).json({ error: 'Failed to update products in Firestore' });
     }
 }
+
+    
