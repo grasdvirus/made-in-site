@@ -6,8 +6,6 @@ import * as admin from 'firebase-admin';
 // This ensures that Firebase is initialized only once per server instance.
 if (!admin.apps.length) {
   try {
-    // Ensure environment variables are loaded.
-    // In a Vercel/Next.js environment, these should be set in the project settings.
     const serviceAccount: admin.ServiceAccount = {
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
@@ -21,8 +19,6 @@ if (!admin.apps.length) {
     });
   } catch (error: any) {
     console.error('Firebase Admin Initialization Error in API route:', error.stack);
-    // We'll respond with an error if initialization fails, which is more informative
-    // than letting it crash on the next database call.
   }
 }
 
@@ -63,9 +59,9 @@ async function getProducts(req: NextApiRequest, res: NextApiResponse) {
         ...doc.data()
     }));
     res.status(200).json(productList);
-  } catch (error) {
+  } catch (error: any) {
     console.error('API Error fetching products:', error);
-    res.status(500).json({ message: 'Failed to fetch products from Firestore' });
+    res.status(500).json({ message: 'Failed to fetch products from Firestore', error: error.message });
   }
 }
 
