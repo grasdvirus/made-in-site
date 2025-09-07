@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { getProducts, updateProducts } from '@/lib/actions/product-actions';
 
 
 // Hardcoded admin email
@@ -46,7 +47,7 @@ export interface Product {
 
 
 export default function AdminPage() {
-  const { user, loading, getToken } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -64,13 +65,11 @@ export default function AdminPage() {
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     try {
-        const response = await fetch('/api/admin/products');
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: 'Le serveur a renvoyé une réponse invalide.' }));
-            throw new Error(errorData.message || 'Une erreur est survenue lors de la récupération des produits.');
+        const result = await getProducts();
+        if (!result.success) {
+            throw new Error(result.error);
         }
-        const data = await response.json();
-        setProducts(data);
+        setProducts(result.data || []);
     } catch (error: any) {
         console.error(error);
         toast({
@@ -114,27 +113,17 @@ export default function AdminPage() {
   }, [products]);
 
   const handleSaveChanges = async () => {
-    const token = await getToken();
-    if (!token) {
+    if (!user) {
         toast({ variant: "destructive", title: "Erreur", description: "Authentification requise." });
         return;
     }
     
     setIsSaving(true);
     try {
-        const response = await fetch('/api/admin/products', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ products })
-        });
+        const result = await updateProducts(products);
 
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.message || "Une erreur inconnue est survenue.");
+        if (!result.success) {
+            throw new Error(result.error);
         }
 
         toast({
@@ -372,3 +361,4 @@ export default function AdminPage() {
     </div>
   );
 }
+
