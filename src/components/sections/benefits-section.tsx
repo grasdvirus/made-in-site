@@ -1,3 +1,4 @@
+
 import { ShippingIcon, ReturnIcon, RefundIcon } from '@/components/icons';
 
 export function BenefitsSection() {
@@ -7,7 +8,7 @@ export function BenefitsSection() {
             <div>
                 <ShippingIcon className="mx-auto mb-4" />
                 <h4 className="text-xl font-semibold mb-2 font-headline">LIVRAISON GRATUITE</h4>
-                <p className="text-primary-foreground/80">Livraison gratuite pour les commandes de plus de 50 $.</p>
+                <p className="text-primary-foreground/80">Livraison gratuite pour les achats de plus de cinq produits.</p>
             </div>
             <div>
                 <ReturnIcon className="mx-auto mb-4" />

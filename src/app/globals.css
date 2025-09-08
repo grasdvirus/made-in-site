@@ -122,6 +122,25 @@
   :hover::-webkit-scrollbar-thumb {
     background-color: hsl(var(--foreground) / 0.4);
   }
+   /* Disable text selection highlight */
+  ::selection {
+    background: transparent;
+  }
+  ::-moz-selection {
+    background: transparent;
+  }
+  body {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  input, textarea {
+     user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+  }
 }
 
 @layer components {

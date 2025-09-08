@@ -11,8 +11,10 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "@/hooks/use-cart.tsx";
 
 export default function CartPage() {
-  const { items, updateItemQuantity, removeItem, clearCart, subtotal, total } = useCart();
-  const shipping = 5000;
+  const { items, updateItemQuantity, removeItem, clearCart, subtotal, total, itemCount } = useCart();
+  
+  // Free shipping if 5 or more items in cart
+  const shipping = itemCount >= 5 ? 0 : 5000;
 
   return (
     <div className="container mx-auto px-4 py-12 md:px-6 lg:py-16">
@@ -86,7 +88,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Livraison</span>
-                  <span>{shipping.toLocaleString('fr-FR')} FCFA</span>
+                  <span>{shipping === 0 ? 'Gratuit' : `${shipping.toLocaleString('fr-FR')} FCFA`}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-bold text-lg">

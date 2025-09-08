@@ -22,7 +22,8 @@ export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({ fullName: '', phone: '', email: '', address: '', notes: '' });
 
-  const shipping = 5000;
+  // Free shipping if 5 or more items in cart
+  const shipping = itemCount >= 5 ? 0 : 5000;
   const total = subtotal + shipping;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -152,7 +153,7 @@ export default function CheckoutPage() {
                 </div>
                  <div>
                   <label htmlFor="notes">Notes de commande (Optionnel)</label>
-                  <Textarea id="notes" placeholder="Instructions spéciales pour la livraison..." value={customerInfo.notes} onChange={handleInputChange} />
+                  <Textarea id="notes" placeholder="Instructions spéciales for la livraison..." value={customerInfo.notes} onChange={handleInputChange} />
                 </div>
               </CardContent>
             </Card>
@@ -197,7 +198,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex justify-between">
                     <span>Livraison</span>
-                    <span>{shipping.toLocaleString('fr-FR')} FCFA</span>
+                     <span>{shipping === 0 ? 'Gratuit' : `${shipping.toLocaleString('fr-FR')} FCFA`}</span>
                   </div>
                 </div>
                 <Separator />
@@ -224,5 +225,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    
