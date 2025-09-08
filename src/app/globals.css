@@ -28,11 +28,13 @@
 
     --gradient-start: hsl(var(--background));
     --gradient-end: hsl(var(--background));
-
-    --shadow-light: -6px -6px 12px hsl(220, 20%, 100%);
-    --shadow-dark: 6px 6px 12px hsl(220, 20%, 88%);
-    --shadow-inset-light: inset -6px -6px 12px hsl(220, 20%, 100%);
-    --shadow-inset-dark: inset 6px 6px 12px hsl(220, 20%, 88%);
+    
+    --shadow-distance: 6px;
+    --shadow-blur: 16px;
+    --shadow-light: calc(var(--shadow-distance) * -1) calc(var(--shadow-distance) * -1) var(--shadow-blur) hsl(220, 20%, 99%);
+    --shadow-dark: var(--shadow-distance) var(--shadow-distance) var(--shadow-blur) hsl(220, 20%, 88%);
+    --shadow-inset-light: inset calc(var(--shadow-distance) * -1) calc(var(--shadow-distance) * -1) var(--shadow-blur) hsl(220, 20%, 99%);
+    --shadow-inset-dark: inset var(--shadow-distance) var(--shadow-distance) var(--shadow-blur) hsl(220, 20%, 88%);
   }
   .dark {
     --background: 220 10% 10%;
@@ -55,10 +57,10 @@
     --input: 220 10% 25%;
     --ring: 220 90% 60%;
     
-    --shadow-light: -6px -6px 12px hsla(220, 10%, 22%, 1);
-    --shadow-dark: 6px 6px 12px hsla(220, 10%, 8%, 1);
-    --shadow-inset-light: inset -6px -6px 12px hsla(220, 10%, 22%, 1);
-    --shadow-inset-dark: inset 6px 6px 12px hsla(220, 10%, 8%, 1);
+    --shadow-light: calc(var(--shadow-distance) * -1) calc(var(--shadow-distance) * -1) var(--shadow-blur) hsla(220, 10%, 22%, 1);
+    --shadow-dark: var(--shadow-distance) var(--shadow-distance) var(--shadow-blur) hsla(220, 10%, 8%, 1);
+    --shadow-inset-light: inset calc(var(--shadow-distance) * -1) calc(var(--shadow-distance) * -1) var(--shadow-blur) hsla(220, 10%, 22%, 1);
+    --shadow-inset-dark: inset var(--shadow-distance) var(--shadow-distance) var(--shadow-blur) hsla(220, 10%, 8%, 1);
   }
 
   .theme-home {
@@ -127,6 +129,7 @@
   .neumorphism-card {
     @apply rounded-xl bg-card border-none;
     box-shadow: var(--shadow-dark), var(--shadow-light);
+    transition: box-shadow 0.3s ease;
   }
   
   /* Neumorphism style for Buttons */
@@ -151,6 +154,8 @@
   .card {
     @apply neumorphism-card;
   }
-}
 
-    
+   .btn-neumorphism {
+    @apply neumorphism-button;
+  }
+}

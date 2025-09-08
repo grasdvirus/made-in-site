@@ -8,18 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle, Trash2, Loader2, Save } from 'lucide-react';
+import { Loader2, Save } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 
-interface CategorySetting {
-    id: string;
-    name: string;
-    hint: string;
-    href: string;
-    image: string; // URL de l'image par défaut/générée
+interface HeroSettings {
+    title: string;
+    subtitle: string;
+    promoText: string;
+    imageUrl: string;
 }
 
 export default function HomeSettingsPage() {
@@ -27,7 +26,12 @@ export default function HomeSettingsPage() {
     const router = useRouter();
     const { toast } = useToast();
 
-    const [categories, setCategories] = useState<CategorySetting[]>([]);
+    const [settings, setSettings] = useState<HeroSettings>({
+        title: '',
+        subtitle: '',
+        promoText: '',
+        imageUrl: '',
+    });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -39,9 +43,19 @@ export default function HomeSettingsPage() {
 
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                setCategories(data.categories || []);
+                setSettings({
+                    title: data.hero?.title || 'SOLDES DU BLACK FRIDAY',
+                    subtitle: data.hero?.subtitle || '20 Nov - 30 Nov',
+                    promoText: data.hero?.promoText || 'Réduction de 40%* sur tous les produits.',
+                    imageUrl: data.hero?.imageUrl || 'https://picsum.photos/1400/500'
+                });
             } else {
-                setCategories([]); // Initialiser avec un tableau vide si le document n'existe pas
+                 setSettings({
+                    title: 'SOLDES DU BLACK FRIDAY',
+                    subtitle: '20 Nov - 30 Nov',
+                    promoText: 'Réduction de 40%* sur tous les produits.',
+                    imageUrl: 'https://picsum.photos/1400/500'
+                });
             }
         } catch (error: any) {
             toast({
@@ -67,43 +81,25 @@ export default function HomeSettingsPage() {
         }
     }, [user, loading, router, fetchSettings, toast]);
 
-    const handleCategoryChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        const newCategories = [...categories];
-        (newCategories[index] as any)[name] = value;
-        setCategories(newCategories);
-    };
-
-    const addCategory = () => {
-        const newId = `cat_${Date.now()}`;
-        setCategories([...categories, { 
-            id: newId, 
-            name: '', 
-            hint: '', 
-            href: '/products/', 
-            image: `https://picsum.photos/400/500?random=${newId}` // Image par défaut
-        }]);
-    };
-
-    const removeCategory = (index: number) => {
-        const newCategories = categories.filter((_, i) => i !== index);
-        setCategories(newCategories);
+        setSettings(prev => ({...prev, [name]: value}));
     };
 
     const handleSaveChanges = async () => {
         setIsSaving(true);
         try {
             const docRef = doc(db, 'settings', 'homePage');
-            await setDoc(docRef, { categories }, { merge: true });
+            await setDoc(docRef, { hero: settings }, { merge: true });
             toast({
                 title: 'Succès',
-                description: 'Les paramètres de la page d\'accueil ont été enregistrés.'
+                description: 'Les paramètres de la bannière d\'accueil ont été enregistrés.'
             });
         } catch (error: any) {
             toast({
                 variant: "destructive",
                 title: "Erreur",
-                description: `Échec de l'enregistrement des paramètres : ${error.message}`,
+                description: `Échec de l'enregistrement : ${error.message}`,
             });
         } finally {
             setIsSaving(false);
@@ -121,7 +117,7 @@ export default function HomeSettingsPage() {
     return (
         <div className="flex-1 space-y-4 pt-6">
             <div className="flex items-center justify-between space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight">Réglages de l'Accueil</h2>
+                <h2 className="text-3xl font-bold tracking-tight">Réglages de la Bannière d'Accueil</h2>
                 <Button onClick={handleSaveChanges} disabled={isSaving}>
                     {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                     Enregistrer les modifications
@@ -130,68 +126,28 @@ export default function HomeSettingsPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Section Catégories (Accueil & Découvrir)</CardTitle>
+                    <CardTitle>Contenu de la Bannière Principale (Hero Section)</CardTitle>
                     <CardDescription>
-                        Gérez les catégories affichées sur la page d'accueil. L'image est définie automatiquement mais peut être surchargée si nécessaire.
+                        Modifiez ici les textes et l'image de la grande bannière sur la page d'accueil.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {categories.map((category, index) => (
-                        <div key={category.id} className="p-4 border rounded-lg relative space-y-4">
-                           <Button 
-                                variant="destructive" 
-                                size="icon" 
-                                className="absolute top-2 right-2 h-6 w-6"
-                                onClick={() => removeCategory(index)}
-                            >
-                                <Trash2 className="h-4 w-4" />
-                           </Button>
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-sm font-medium">Nom de la Catégorie</label>
-                                    <Input
-                                        name="name"
-                                        value={category.name}
-                                        onChange={(e) => handleCategoryChange(index, e)}
-                                        placeholder="Ex: Femmes"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium">Lien de Destination</label>
-                                    <Input
-                                        name="href"
-                                        value={category.href}
-                                        onChange={(e) => handleCategoryChange(index, e)}
-                                        placeholder="/products/femmes"
-                                    />
-                                </div>
-                           </div>
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                               <div>
-                                    <label className="text-sm font-medium">Indice IA (pour l'image)</label>
-                                    <Input
-                                        name="hint"
-                                        value={category.hint}
-                                        onChange={(e) => handleCategoryChange(index, e)}
-                                        placeholder="Ex: woman fashion"
-                                    />
-                               </div>
-                               <div>
-                                    <label className="text-sm font-medium">URL de l'image (optionnel)</label>
-                                    <Input
-                                        name="image"
-                                        value={category.image}
-                                        onChange={(e) => handleCategoryChange(index, e)}
-                                        placeholder="URL directe de l'image"
-                                    />
-                               </div>
-                           </div>
-                        </div>
-                    ))}
-                    <Button onClick={addCategory} variant="outline">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Ajouter une catégorie
-                    </Button>
+                     <div className="space-y-2">
+                        <label htmlFor="title">Titre Principal</label>
+                        <Input id="title" name="title" value={settings.title} onChange={handleInputChange} placeholder="Ex: SOLDES D'ÉTÉ"/>
+                    </div>
+                     <div className="space-y-2">
+                        <label htmlFor="subtitle">Sous-titre / Dates</label>
+                        <Input id="subtitle" name="subtitle" value={settings.subtitle} onChange={handleInputChange} placeholder="Ex: 1er au 31 juillet"/>
+                    </div>
+                     <div className="space-y-2">
+                        <label htmlFor="promoText">Texte Promotionnel</label>
+                        <Input id="promoText" name="promoText" value={settings.promoText} onChange={handleInputChange} placeholder="Ex: Jusqu'à -50% sur une sélection"/>
+                    </div>
+                    <div className="space-y-2">
+                        <label htmlFor="imageUrl">URL de l'image de fond</label>
+                        <Input id="imageUrl" name="imageUrl" value={settings.imageUrl} onChange={handleInputChange} placeholder="https://..."/>
+                    </div>
                 </CardContent>
             </Card>
         </div>

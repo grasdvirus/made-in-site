@@ -11,7 +11,7 @@ const AdminSidebar = () => {
     const navItems = [
         { href: '/admin/products', label: 'Produits', icon: Package },
         { href: '/admin/categories', label: 'Catégories', icon: LayoutGrid },
-        { href: '/admin/settings/home', label: 'Réglages Accueil', icon: Settings },
+        { href: '/admin/settings/home', label: 'Bannière Accueil', icon: Settings },
     ];
 
     return (
