@@ -81,22 +81,13 @@ export default function SignaturePage() {
             </div>
         ) : settings ? (
             <Card className="overflow-hidden">
-                <div className="relative w-full h-48 bg-muted">
-                    <Image 
-                        src="https://picsum.photos/800/200" 
-                        alt="Bannière abstraite"
-                        fill
-                        className="object-cover"
-                        data-ai-hint="abstract texture"
-                    />
-                </div>
-                <CardContent className="p-8 text-center">
+                <CardContent className="p-8 text-center pt-12">
                     <Image 
                         src={settings.imageUrl || `https://i.pravatar.cc/150?u=${settings.email}`} 
                         alt={`Photo de ${settings.fullName}`}
                         width={128}
                         height={128}
-                        className="rounded-full mx-auto -mt-24 mb-4 border-4 border-background object-cover"
+                        className="rounded-full mx-auto mb-4 border-4 border-background object-cover"
                         data-ai-hint="portrait professional"
                     />
                     <h2 className="text-3xl font-bold font-headline">{settings.fullName}</h2>
