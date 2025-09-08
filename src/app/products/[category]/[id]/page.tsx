@@ -158,8 +158,8 @@ export default function ProductDetailPage() {
                 </CarouselItem>
             ))}
             </CarouselContent>
-            <CarouselPrevious className="block md:hidden" />
-            <CarouselNext className="block md:hidden" />
+            <CarouselPrevious className="hidden md:flex" />
+            <CarouselNext className="hidden md:flex" />
         </Carousel>
       </div>
     </div>

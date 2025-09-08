@@ -41,7 +41,7 @@ export default function RootLayout({
               <div className="bg-muted/40">{children}</div>
             ) : (
                 <ClientLayout>
-                    <div className="container bg-card shadow-lg overflow-hidden p-0">
+                    <div className="bg-card shadow-lg">
                         <Header />
                         {children}
                         <Footer />

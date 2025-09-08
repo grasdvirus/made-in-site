@@ -68,14 +68,14 @@ export function HeroSection() {
 
   if (isLoading || !settings || !randomImageUrl) {
     return (
-        <section className="p-6 md:p-10">
+        <section className="container mx-auto p-4 md:p-6">
              <Skeleton className="rounded-2xl w-full min-h-[500px]" />
         </section>
     );
   }
 
   return (
-    <section className="p-6 md:p-10">
+    <section className="container mx-auto p-4 md:p-6">
       <div 
         className="relative overflow-hidden rounded-2xl p-8 md:p-16 lg:p-24 text-white flex flex-col justify-center min-h-[500px] bg-cover bg-center transition-all duration-500" 
         style={{ backgroundImage: `url('${randomImageUrl}')` }} 

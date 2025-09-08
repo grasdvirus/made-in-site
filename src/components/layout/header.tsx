@@ -53,8 +53,8 @@ export function Header() {
   const isAdmin = user && user.email === ADMIN_EMAIL;
 
   return (
-    <header className="p-6 border-b bg-background/50">
-      <div className="flex items-center justify-between">
+    <header className="p-4 md:p-6 border-b bg-background/50 sticky top-0 z-40">
+      <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-12">
           <Link
             href="/"
@@ -88,14 +88,16 @@ export function Header() {
             <Button variant="ghost" size="icon">
               <Search className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
-              <Heart className="h-5 w-5" />
-            </Button>
-            <div className="w-px h-6 bg-border mx-1"></div>
+            <div className="w-px h-6 bg-border mx-1 hidden sm:block"></div>
             <Button variant="ghost" asChild>
-              <Link href="/cart">
-                <ShoppingBag className="h-5 w-5 mr-2" />
-                <span className="font-semibold text-sm sm:text-base">{itemCount > 0 ? `${total.toLocaleString('fr-FR')} FCFA` : '0 FCFA'} ({itemCount})</span>
+              <Link href="/cart" className="relative">
+                <ShoppingBag className="h-5 w-5" />
+                 {itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+                        {itemCount}
+                    </span>
+                 )}
+                <span className="sr-only sm:not-sr-only sm:ml-2 font-semibold text-sm">{total > 0 ? `${total.toLocaleString('fr-FR')} FCFA` : ''}</span>
               </Link>
             </Button>
           </div>
