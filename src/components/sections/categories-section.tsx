@@ -5,13 +5,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Loader2 } from 'lucide-react';
 
 interface CategorySetting {
     id: string;
     name: string;
+    slug: string;
     image: string; // URL de l'image
     hint: string;
     href: string;
@@ -26,35 +27,54 @@ const CategoryCard = ({ image, name, hint, href }: { image: string, name: string
 );
 
 export function CategoriesSection() {
-    const [categories, setCategories] = useState<CategorySetting[]>([]);
+    const [activeCategories, setActiveCategories] = useState<CategorySetting[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [totalCategories, setTotalCategories] = useState(0);
+
 
     useEffect(() => {
-        const fetchCategories = async () => {
+        const fetchAndFilterCategories = async () => {
             setIsLoading(true);
             try {
-                const docRef = doc(db, 'settings', 'homePage');
-                const docSnap = await getDoc(docRef);
+                const categoriesRef = collection(db, 'categories');
+                const categoriesSnapshot = await getDocs(query(categoriesRef));
+                const allCategories = categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    setCategories(data.categories || []);
-                } else {
-                    console.log("No such document!");
-                    setCategories([]);
+                setTotalCategories(allCategories.length);
+
+                const filteredCategories: CategorySetting[] = [];
+
+                for (const cat of allCategories) {
+                    const productsRef = collection(db, 'products');
+                    const q = query(productsRef, where('category', '==', cat.slug), limit(1));
+                    const productSnapshot = await getDocs(q);
+
+                    if (!productSnapshot.empty) {
+                        filteredCategories.push({
+                            id: cat.id,
+                            name: cat.name,
+                            slug: cat.slug,
+                            image: `https://picsum.photos/seed/${cat.slug}/400/500`,
+                            hint: `${cat.name} fashion`,
+                            href: `/products/${cat.slug}`
+                        });
+                    }
                 }
+                
+                setActiveCategories(filteredCategories);
+
             } catch (error) {
                 console.error("Error fetching categories:", error);
-                setCategories([]);
+                setActiveCategories([]);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchCategories();
+        fetchAndFilterCategories();
     }, []);
 
-    const visibleCategories = categories.slice(0, 4);
+    const visibleCategories = activeCategories.slice(0, 4);
 
     return (
         <section className="py-12 px-6 md:px-10">
@@ -64,7 +84,7 @@ export function CategoriesSection() {
                     <p className="text-muted-foreground max-w-sm">Explorez nos collections, conçues pour vous apporter les dernières tendances et des styles intemporels.</p>
                     <Button asChild variant="outline" className="flex-shrink-0 rounded-full hidden sm:inline-flex">
                          <Link href="/products">
-                            {categories.length > 4 ? `Voir les ${categories.length} catégories` : 'Toutes les catégories'}
+                            {totalCategories > 4 ? `Voir les ${totalCategories} catégories` : 'Toutes les catégories'}
                         </Link>
                     </Button>
                 </div>
@@ -73,17 +93,17 @@ export function CategoriesSection() {
                 <div className="flex justify-center items-center h-64">
                     <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
-            ) : categories.length > 0 ? (
+            ) : activeCategories.length > 0 ? (
                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {visibleCategories.map(cat => <CategoryCard key={cat.id} {...cat} />)}
                 </div>
             ) : (
-                <p className="text-center text-muted-foreground py-16">Aucune catégorie à afficher pour le moment.</p>
+                <p className="text-center text-muted-foreground py-16">Aucune catégorie avec des produits à afficher pour le moment.</p>
             )}
            
             <Button asChild variant="outline" className="sm:hidden block mt-6 w-full rounded-full">
                  <Link href="/products">
-                    {categories.length > 4 ? `Voir les ${categories.length} catégories` : 'Toutes les catégories'}
+                    {totalCategories > 4 ? `Voir les ${totalCategories} catégories` : 'Toutes les catégories'}
                 </Link>
             </Button>
         </section>
