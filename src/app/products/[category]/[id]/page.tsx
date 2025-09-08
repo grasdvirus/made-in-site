@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -157,8 +158,8 @@ export default function ProductDetailPage() {
                 </CarouselItem>
             ))}
             </CarouselContent>
-            <CarouselPrevious className="block" />
-            <CarouselNext className="block" />
+            <CarouselPrevious className="block md:hidden" />
+            <CarouselNext className="block md:hidden" />
         </Carousel>
       </div>
     </div>

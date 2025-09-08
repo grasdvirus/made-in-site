@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { Button } from "@/components/ui/button";
@@ -10,10 +11,16 @@ import { Minus, Plus, Star } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { useCart } from "@/hooks/use-cart.tsx";
-import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export function ProductDetailsClient({ product }: { product: Product }) {
     const [quantity, setQuantity] = useState(1);
+    const [selectedSize, setSelectedSize] = useState<string | null>(null);
+    const [selectedColor, setSelectedColor] = useState<string | null>(null);
+    const [activeImage, setActiveImage] = useState(product.imageUrl);
+
     const { toast } = useToast();
     const { addItem } = useCart();
     
@@ -21,6 +28,14 @@ export function ProductDetailsClient({ product }: { product: Product }) {
     const availableColors = product.colors?.split(',').map(s => s.trim()).filter(Boolean) || [];
 
     const handleAddToCart = () => {
+        if (availableSizes.length > 0 && !selectedSize) {
+            toast({ variant: 'destructive', title: "Veuillez sélectionner une taille." });
+            return;
+        }
+        if (availableColors.length > 0 && !selectedColor) {
+            toast({ variant: 'destructive', title: "Veuillez sélectionner une couleur." });
+            return;
+        }
         addItem(product, quantity);
         toast({
           title: "Produit ajouté au panier",
@@ -30,15 +45,27 @@ export function ProductDetailsClient({ product }: { product: Product }) {
 
     return (
         <div className="grid md:grid-cols-2 gap-12">
-            <div>
-            <Image
-                src={product.imageUrl}
-                alt={product.name}
-                width={600}
-                height={800}
-                className="rounded-lg object-cover w-full aspect-[4/5]"
-                data-ai-hint={product.hint}
-            />
+            <div className="space-y-4">
+                <div className="bg-muted rounded-lg overflow-hidden">
+                    <Image
+                        src={activeImage}
+                        alt={product.name}
+                        width={600}
+                        height={800}
+                        className="rounded-lg object-cover w-full aspect-[4/5] transition-all duration-300"
+                        data-ai-hint={product.hint}
+                    />
+                </div>
+                <div className="grid grid-cols-5 gap-2">
+                    <button onClick={() => setActiveImage(product.imageUrl)} className={cn("rounded-md overflow-hidden border-2", activeImage === product.imageUrl ? 'border-primary' : 'border-transparent')}>
+                        <Image src={product.imageUrl} alt="Thumbnail 1" width={100} height={125} className="object-cover w-full aspect-[4/5]"/>
+                    </button>
+                    {product.imageUrl2 && (
+                         <button onClick={() => setActiveImage(product.imageUrl2!)} className={cn("rounded-md overflow-hidden border-2", activeImage === product.imageUrl2 ? 'border-primary' : 'border-transparent')}>
+                            <Image src={product.imageUrl2} alt="Thumbnail 2" width={100} height={125} className="object-cover w-full aspect-[4/5]"/>
+                        </button>
+                    )}
+                </div>
             </div>
             <div>
             <h1 className="text-4xl font-bold font-headline mb-4">{product.name}</h1>
@@ -56,25 +83,39 @@ export function ProductDetailsClient({ product }: { product: Product }) {
             <Separator className="my-6" />
 
             {availableSizes.length > 0 && (
-                <div className="flex items-center gap-4 mb-4">
-                    <p className="font-semibold">Tailles :</p>
-                    <div className="flex flex-wrap gap-2">
-                        {availableSizes.map(size => <Badge key={size} variant="outline">{size}</Badge>)}
-                    </div>
+                <div className="space-y-4 mb-6">
+                    <p className="font-semibold">Taille : <span className="text-muted-foreground">{selectedSize}</span></p>
+                    <RadioGroup value={selectedSize || undefined} onValueChange={setSelectedSize} className="flex flex-wrap gap-2">
+                        {availableSizes.map(size => (
+                             <div key={size}>
+                                <RadioGroupItem value={size} id={`size-${size}`} className="peer sr-only"/>
+                                <Label htmlFor={`size-${size}`} className="h-10 w-10 flex items-center justify-center rounded-full border text-sm font-semibold cursor-pointer transition-colors peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground peer-data-[state=checked]:border-primary hover:bg-accent hover:text-accent-foreground">
+                                    {size}
+                                </Label>
+                             </div>
+                        ))}
+                    </RadioGroup>
                 </div>
             )}
 
              {availableColors.length > 0 && (
-                <div className="flex items-center gap-4 mb-6">
-                    <p className="font-semibold">Couleurs :</p>
-                     <div className="flex flex-wrap gap-2">
-                        {availableColors.map(color => <Badge key={color} variant="outline">{color}</Badge>)}
-                    </div>
+                <div className="space-y-4 mb-6">
+                    <p className="font-semibold">Couleur : <span className="text-muted-foreground">{selectedColor}</span></p>
+                    <RadioGroup value={selectedColor || undefined} onValueChange={setSelectedColor} className="flex flex-wrap gap-3">
+                       {availableColors.map(color => (
+                             <div key={color}>
+                                <RadioGroupItem value={color} id={`color-${color}`} className="peer sr-only"/>
+                                <Label htmlFor={`color-${color}`} className="px-4 py-2 flex items-center justify-center rounded-md border text-sm font-semibold cursor-pointer transition-colors peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground peer-data-[state=checked]:border-primary hover:bg-accent hover:text-accent-foreground">
+                                    {color}
+                                </Label>
+                             </div>
+                        ))}
+                    </RadioGroup>
                 </div>
             )}
 
             <div className="flex items-center gap-4 mb-6">
-                <p>Quantité:</p>
+                <p className="font-semibold">Quantité:</p>
                 <div className="flex items-center border rounded-md">
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setQuantity(q => Math.max(1, q - 1))}>
                         <Minus className="h-4 w-4" />

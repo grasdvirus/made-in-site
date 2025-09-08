@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import type { Metadata } from 'next';
@@ -10,6 +11,7 @@ import { AuthProvider } from '@/hooks/use-auth';
 import { ClientLayout } from '@/components/layout/client-layout';
 import { CartProvider } from '@/hooks/use-cart.tsx';
 import { usePathname } from 'next/navigation';
+import { ScrollToTopButton } from '@/components/ui/scroll-to-top-button';
 
 // export const metadata: Metadata = {
 //   title: 'EzyRetail AI',
@@ -25,7 +27,7 @@ export default function RootLayout({
   const isAdminPage = pathname.startsWith('/admin');
 
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning className="scroll-smooth">
       <head>
         <title>EzyRetail AI</title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -47,6 +49,7 @@ export default function RootLayout({
                 </ClientLayout>
             )}
             <Toaster />
+            <ScrollToTopButton />
           </CartProvider>
         </AuthProvider>
       </body>

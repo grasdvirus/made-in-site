@@ -47,7 +47,8 @@ export interface Product {
     price: number;
     description: string;
     category: string;
-    imageUrl: string; 
+    imageUrl: string;
+    imageUrl2?: string;
     hint?: string;
     sizes?: string;
     colors?: string;
@@ -59,13 +60,12 @@ export interface Category {
     slug: string;
 }
 
-function ProductForm({ product: initialProduct, categories, onSave, isSaving, isUploading, onImageUpload }: {
+function ProductForm({ product: initialProduct, categories, onSave, isSaving, onImageUpload }: {
     product: Partial<Product>;
     categories: Category[];
     onSave: (product: Partial<Product>) => void;
     isSaving: boolean;
-    isUploading: boolean;
-    onImageUpload: (e: ChangeEvent<HTMLInputElement>) => void;
+    onImageUpload: (e: ChangeEvent<HTMLInputElement>, imageField: 'imageUrl' | 'imageUrl2') => void;
 }) {
     const [product, setProduct] = useState(initialProduct);
 
@@ -149,16 +149,29 @@ function ProductForm({ product: initialProduct, categories, onSave, isSaving, is
                       <CardHeader>
                           <CardTitle>Média</CardTitle>
                       </CardHeader>
-                       <CardContent className="space-y-4">
-                          <div className="space-y-2">
-                            <label>Image</label>
+                       <CardContent className="space-y-6">
+                          <div className="space-y-4">
+                            <label className="text-sm font-medium">Image Principale</label>
                             <div className="flex items-center gap-4">
-                              <Image src={product.imageUrl || DEFAULT_PRODUCT_IMAGE} alt="Aperçu" width={64} height={64} className="rounded-md object-cover bg-muted" />
+                              <Image src={product.imageUrl || DEFAULT_PRODUCT_IMAGE} alt="Aperçu 1" width={64} height={64} className="rounded-md object-cover bg-muted" />
                               <Button asChild variant="outline">
                                 <label htmlFor={`image-upload-${product.id}`} className="cursor-pointer flex items-center">
-                                  { isUploading ? <Loader2 className="h-4 w-4 animate-spin mr-2"/> : <Upload className="h-4 w-4 mr-2" /> }
+                                  <Upload className="h-4 w-4 mr-2" />
                                   Changer
-                                  <Input id={`image-upload-${product.id}`} type="file" accept="image/*" className="sr-only" onChange={onImageUpload} disabled={isUploading}/>
+                                  <Input id={`image-upload-${product.id}`} type="file" accept="image/*" className="sr-only" onChange={(e) => onImageUpload(e, 'imageUrl')}/>
+                                </label>
+                              </Button>
+                            </div>
+                          </div>
+                           <div className="space-y-4">
+                            <label className="text-sm font-medium">Image Secondaire (Optionnel)</label>
+                            <div className="flex items-center gap-4">
+                              <Image src={product.imageUrl2 || DEFAULT_PRODUCT_IMAGE} alt="Aperçu 2" width={64} height={64} className="rounded-md object-cover bg-muted" />
+                              <Button asChild variant="outline">
+                                <label htmlFor={`image-upload-2-${product.id}`} className="cursor-pointer flex items-center">
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Changer
+                                  <Input id={`image-upload-2-${product.id}`} type="file" accept="image/*" className="sr-only" onChange={(e) => onImageUpload(e, 'imageUrl2')}/>
                                 </label>
                               </Button>
                             </div>
@@ -191,7 +204,6 @@ export default function AdminProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   
   const [editingProductId, setEditingProductId] = useState<string | null>(null); // For accordion
@@ -242,6 +254,7 @@ export default function AdminProductsPage() {
             description: productData.description || '',
             category: productData.category,
             imageUrl: productData.imageUrl || DEFAULT_PRODUCT_IMAGE,
+            imageUrl2: productData.imageUrl2 || '',
             hint: productData.hint || '',
             sizes: productData.sizes || '',
             colors: productData.colors || '',
@@ -263,11 +276,11 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>, productId: string | null) => {
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>, productId: string | null, imageField: 'imageUrl' | 'imageUrl2') => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
+    setIsSaving(true);
     const formData = new FormData();
     formData.append('file', file);
 
@@ -278,13 +291,13 @@ export default function AdminProductsPage() {
       const { url } = await response.json();
 
       if (productId === 'new') {
-        setNewProduct(prev => ({ ...prev, imageUrl: url }));
+        setNewProduct(prev => ({ ...prev, [imageField]: url }));
       } else {
         const productToUpdate = products.find(p => p.id === productId);
         if (productToUpdate) {
-            const updatedProduct = {...productToUpdate, imageUrl: url };
+            const updatedProduct = {...productToUpdate, [imageField]: url };
             const docRef = doc(db, 'products', productId!);
-            await setDoc(docRef, { imageUrl: url }, { merge: true });
+            await setDoc(docRef, { [imageField]: url }, { merge: true });
             setProducts(products.map(p => p.id === productId ? updatedProduct : p));
             toast({ title: 'Image mise à jour.' });
         }
@@ -292,7 +305,7 @@ export default function AdminProductsPage() {
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Erreur de téléversement', description: error.message });
     } finally {
-      setIsUploading(false);
+      setIsSaving(false);
     }
   };
 
@@ -368,8 +381,7 @@ export default function AdminProductsPage() {
                                     categories={categories}
                                     onSave={handleSaveProduct}
                                     isSaving={isSaving}
-                                    isUploading={isUploading}
-                                    onImageUpload={(e) => handleImageUpload(e, 'new')}
+                                    onImageUpload={(e, field) => handleImageUpload(e, 'new', field)}
                                 />
                              </AccordionContent>
                         </AccordionItem>
@@ -401,8 +413,7 @@ export default function AdminProductsPage() {
                                     categories={categories}
                                     onSave={handleSaveProduct}
                                     isSaving={isSaving}
-                                    isUploading={isUploading}
-                                    onImageUpload={(e) => handleImageUpload(e, product.id)}
+                                    onImageUpload={(e, field) => handleImageUpload(e, product.id, field)}
                                 />
                             </AccordionContent>
                         </AccordionItem>
