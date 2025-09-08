@@ -43,22 +43,37 @@ export default function DiscoverPage() {
             const productSnapshot = await getDocs(query(productsRef));
             const allProducts = productSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
             
-            const shuffledProducts = shuffleArray(allProducts);
-
-            const productList = shuffledProducts.map(product => {
+            const expandedProducts: DiscoverProduct[] = [];
+            allProducts.forEach(product => {
                 const height = Math.floor(Math.random() * (600 - 400 + 1) + 400);
-                return {
-                    id: product.id,
-                    name: product.name,
-                    image: product.imageUrl,
-                    hint: product.hint || "fashion product",
-                    href: `/products/${product.category}/${product.id}`,
-                    width: 400,
-                    height: height
-                };
+                // Add primary image
+                if (product.imageUrl) {
+                    expandedProducts.push({
+                        id: product.id,
+                        name: product.name,
+                        image: product.imageUrl,
+                        hint: product.hint || "fashion product",
+                        href: `/products/${product.category}/${product.id}`,
+                        width: 400,
+                        height: height
+                    });
+                }
+                // Add secondary image if it exists
+                if (product.imageUrl2) {
+                     expandedProducts.push({
+                        id: `${product.id}_2`, // Create a unique ID for the key
+                        name: product.name,
+                        image: product.imageUrl2,
+                        hint: product.hint || "fashion product",
+                        href: `/products/${product.category}/${product.id}`,
+                        width: 400,
+                        height: height
+                    });
+                }
             });
 
-            setDiscoverProducts(productList);
+            setDiscoverProducts(shuffleArray(expandedProducts));
+
         } catch (error) {
             console.error("Error fetching products for discover page:", error);
         } finally {
