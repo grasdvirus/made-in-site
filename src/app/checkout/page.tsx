@@ -7,48 +7,78 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { WalletCards, Diamond, Loader2 } from "lucide-react";
-import { useCart } from "@/hooks/use-cart";
+import { useCart } from "@/hooks/use-cart.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Textarea } from "@/components/ui/textarea";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function CheckoutPage() {
-  const { items, subtotal, clearCart } = useCart();
+  const { items, subtotal, clearCart, itemCount } = useCart();
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [customerInfo, setCustomerInfo] = useState({ fullName: '', phone: '', email: '' });
+  const [customerInfo, setCustomerInfo] = useState({ fullName: '', phone: '', email: '', address: '', notes: '' });
 
   const shipping = 5000;
   const total = subtotal + shipping;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setCustomerInfo(prev => ({...prev, [id]: value}));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerInfo.fullName || !customerInfo.phone) {
+    if (!customerInfo.fullName || !customerInfo.phone || !customerInfo.address) {
       toast({
         variant: "destructive",
         title: "Champs requis",
-        description: "Veuillez renseigner votre nom complet et votre numéro de téléphone.",
+        description: "Veuillez renseigner votre nom complet, votre numéro de téléphone et votre adresse de livraison.",
       });
       return;
     }
     
     setIsLoading(true);
-    // Simulate order submission
-    setTimeout(() => {
-      toast({
-        title: "Commande soumise !",
-        description: "Merci pour votre commande. Nous vous contacterons bientôt pour confirmer.",
-      });
-      clearCart();
-      router.push('/');
-      setIsLoading(false);
-    }, 2000);
+    
+    try {
+        const orderData = {
+            customer: customerInfo,
+            items: items.map(item => ({
+                id: item.id,
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price
+            })),
+            subtotal,
+            shipping,
+            total,
+            itemCount,
+            status: 'Nouvelle',
+            createdAt: new Date()
+        };
+
+        await addDoc(collection(db, 'orders'), orderData);
+        
+        toast({
+            title: "Commande soumise !",
+            description: "Merci pour votre commande. Nous vous contacterons bientôt pour confirmer.",
+        });
+        clearCart();
+        router.push('/');
+
+    } catch (error: any) {
+        console.error("Order submission error: ", error);
+        toast({
+            variant: "destructive",
+            title: "Erreur",
+            description: `Impossible de soumettre la commande. ${error.message}`,
+        });
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
@@ -112,9 +142,17 @@ export default function CheckoutPage() {
                   <label htmlFor="phone">Numéro de téléphone</label>
                   <Input id="phone" placeholder="Pour la confirmation de la commande" value={customerInfo.phone} onChange={handleInputChange} required />
                 </div>
+                 <div>
+                  <label htmlFor="address">Adresse de livraison</label>
+                  <Input id="address" placeholder="Ex: Cocody Angré 7ème tranche" value={customerInfo.address} onChange={handleInputChange} required />
+                </div>
                 <div>
                   <label htmlFor="email">Email (Optionnel)</label>
                   <Input id="email" type="email" value={customerInfo.email} onChange={handleInputChange}/>
+                </div>
+                 <div>
+                  <label htmlFor="notes">Notes de commande (Optionnel)</label>
+                  <Textarea id="notes" placeholder="Instructions spéciales pour la livraison..." value={customerInfo.notes} onChange={handleInputChange} />
                 </div>
               </CardContent>
             </Card>
@@ -186,3 +224,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+    

@@ -1,7 +1,35 @@
+
+'use client'
+
 import Link from 'next/link';
 import { Facebook, Instagram } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+interface SocialSettings {
+    facebook: string;
+    instagram: string;
+}
 
 export function Footer() {
+    const [socialLinks, setSocialLinks] = useState<SocialSettings>({ facebook: '#', instagram: '#' });
+
+    useEffect(() => {
+        const fetchSocialLinks = async () => {
+            try {
+                const docRef = doc(db, 'settings', 'socialLinks');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setSocialLinks(docSnap.data() as SocialSettings);
+                }
+            } catch (error) {
+                console.error("Error fetching social links:", error);
+            }
+        };
+        fetchSocialLinks();
+    }, []);
+
   return (
     <footer className="bg-card border-t">
       <div className="container mx-auto py-16 px-6 md:px-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -43,10 +71,12 @@ export function Footer() {
           <Link href="/terms-and-conditions" className="hover:text-foreground">Conditions de service</Link>
         </div>
         <div className="flex space-x-4">
-          <Link href="#" className="hover:text-foreground"><Facebook className="h-5 w-5" /></Link>
-          <Link href="#" className="hover:text-foreground"><Instagram className="h-5 w-5" /></Link>
+          {socialLinks.facebook && <Link href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-foreground"><Facebook className="h-5 w-5" /></Link>}
+          {socialLinks.instagram && <Link href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-foreground"><Instagram className="h-5 w-5" /></Link>}
         </div>
       </div>
     </footer>
   );
 }
+
+    

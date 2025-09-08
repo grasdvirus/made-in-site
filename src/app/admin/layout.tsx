@@ -2,16 +2,19 @@
 'use client'
 
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from '@/components/ui/sidebar';
-import { Home, ShoppingCart, Package, Users, LineChart, Tag, Settings, Info, LayoutGrid } from 'lucide-react';
+import { Home, ShoppingCart, Package, Users, LineChart, Tag, Settings, Info, LayoutGrid, FileText, Link2, ListOrdered } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const AdminSidebar = () => {
     const pathname = usePathname();
     const navItems = [
+        { href: '/admin/orders', label: 'Commandes', icon: ListOrdered },
         { href: '/admin/products', label: 'Produits', icon: Package },
         { href: '/admin/categories', label: 'Catégories', icon: LayoutGrid },
         { href: '/admin/settings/home', label: 'Bannière Accueil', icon: Settings },
+        { href: '/admin/settings/about', label: 'Page "À Propos"', icon: FileText },
+        { href: '/admin/settings/social', label: 'Réseaux Sociaux', icon: Link2 },
     ];
 
     return (
@@ -67,3 +70,5 @@ export default function AdminLayout({
     </SidebarProvider>
   )
 }
+
+    

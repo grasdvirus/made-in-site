@@ -1,10 +1,48 @@
+
+'use client'
+
 import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ShippingIcon, ReturnIcon, RefundIcon } from '@/components/icons';
-import { FileText, FileCheck, HelpCircle } from 'lucide-react';
+import { FileText, FileCheck, HelpCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+interface AboutSettings {
+    story: string;
+    mission: string;
+}
 
 export default function AboutPage() {
+    const [settings, setSettings] = useState<AboutSettings | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            setIsLoading(true);
+            try {
+                const docRef = doc(db, 'settings', 'aboutPage');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setSettings(docSnap.data() as AboutSettings);
+                } else {
+                    // Fallback default content
+                    setSettings({
+                        story: "Fondée en 2024, EzyRetail a commencé avec une vision simple : rendre la mode de luxe accessible et personnelle. Nous avons vu une opportunité de combiner la technologie avec le stylisme personnel pour créer une expérience de magasinage unique. Partis d'une petite boutique, nous sommes maintenant une plateforme en ligne florissante, au service des passionnés de mode du monde entier. Notre engagement envers la qualité, le style et l'innovation reste au cœur de tout ce que nous faisons.",
+                        mission: "Notre mission est de vous donner les moyens d'exprimer votre individualité à travers la mode. Nous croyons que le style est une forme d'expression de soi, et nous nous efforçons de fournir des sélections qui répondent à tous les goûts et à toutes les occasions. Avec notre guide de style alimenté par l'IA, nous allons au-delà de la simple vente de vêtements ; nous vous aidons à découvrir et à affiner votre style personnel, en veillant à ce que vous vous sentiez confiant et inspiré chaque jour."
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching about page settings:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchSettings();
+    }, []);
+
   return (
     <div className="container mx-auto px-4 py-12 md:px-6 lg:py-16">
       <div className="max-w-4xl mx-auto">
@@ -27,26 +65,26 @@ export default function AboutPage() {
             />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12 text-muted-foreground mb-16">
-            <div>
-                <h2 className="text-3xl font-bold font-headline text-foreground mb-4">Notre Histoire</h2>
-                <p className="mb-4">
-                    Fondée en 2024, EzyRetail a commencé avec une vision simple : rendre la mode de luxe accessible et personnelle. Nous avons vu une opportunité de combiner la technologie avec le stylisme personnel pour créer une expérience de magasinage unique.
-                </p>
-                <p>
-                    Partis d'une petite boutique, nous sommes maintenant une plateforme en ligne florissante, au service des passionnés de mode du monde entier. Notre engagement envers la qualité, le style et l'innovation reste au cœur de tout ce que nous faisons.
-                </p>
+        {isLoading ? (
+             <div className="flex justify-center items-center h-48">
+                <Loader2 className="h-8 w-8 animate-spin" />
             </div>
-            <div>
-                <h2 className="text-3xl font-bold font-headline text-foreground mb-4">Notre Mission</h2>
-                <p className="mb-4">
-                    Notre mission est de vous donner les moyens d'exprimer votre individualité à travers la mode. Nous croyons que le style est une forme d'expression de soi, et nous nous efforçons de fournir des sélections qui répondent à tous les goûts et à toutes les occasions.
-                </p>
-                <p>
-                    Avec notre guide de style alimenté par l'IA, nous allons au-delà de la simple vente de vêtements ; nous vous aidons à découvrir et à affiner votre style personnel, en veillant à ce que vous vous sentiez confiant et inspiré chaque jour.
-                </p>
+        ) : settings && (
+            <div className="grid md:grid-cols-2 gap-12 text-muted-foreground mb-16">
+                <div>
+                    <h2 className="text-3xl font-bold font-headline text-foreground mb-4">Notre Histoire</h2>
+                    <p className="mb-4 whitespace-pre-line">
+                        {settings.story}
+                    </p>
+                </div>
+                <div>
+                    <h2 className="text-3xl font-bold font-headline text-foreground mb-4">Notre Mission</h2>
+                    <p className="mb-4 whitespace-pre-line">
+                       {settings.mission}
+                    </p>
+                </div>
             </div>
-        </div>
+        )}
 
         <div className="text-center mb-12">
             <h2 className="text-3xl font-bold font-headline text-foreground mb-4">Besoin d'aide ?</h2>
@@ -127,3 +165,5 @@ export default function AboutPage() {
     </div>
   );
 }
+
+    
