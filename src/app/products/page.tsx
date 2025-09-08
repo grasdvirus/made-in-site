@@ -13,33 +13,62 @@ import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { collection, getDocs, query, orderBy } from "firebase/firestore"
+import { collection, getDocs, query, orderBy, limit, where } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { ArrowRight, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import type { Product } from "@/app/admin/products/page";
 
-interface Category {
+
+interface CategoryWithImage {
     id: string;
     name: string;
     slug: string;
+    imageUrl: string;
+    hint: string;
 }
   
 export default function ProductsPage() {
-    const [categories, setCategories] = useState<Category[]>([]);
+    const [categoriesWithImages, setCategoriesWithImages] = useState<CategoryWithImage[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchCategories = async () => {
+        const fetchCategoriesAndImages = async () => {
             setIsLoading(true);
             try {
                 const categoriesCol = collection(db, 'categories');
                 const q = query(categoriesCol, orderBy('name'));
                 const categoriesSnapshot = await getDocs(q);
-                const categoryList = categoriesSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                })) as Category[];
-                setCategories(categoryList);
+                
+                const categoryListPromises = categoriesSnapshot.docs.map(async (doc) => {
+                    const category = { id: doc.id, ...doc.data() };
+                    
+                    // Fetch one product from this category to get an image
+                    const productsRef = collection(db, 'products');
+                    const productQuery = query(productsRef, where('category', '==', category.slug), limit(1));
+                    const productSnapshot = await getDocs(productQuery);
+                    
+                    let imageUrl = `https://picsum.photos/seed/${category.slug}/800/600`;
+                    let hint = `${category.name} fashion`;
+
+                    if (!productSnapshot.empty) {
+                        const product = productSnapshot.docs[0].data() as Product;
+                        imageUrl = product.imageUrl;
+                        hint = product.hint || hint;
+                    }
+
+                    return {
+                        id: category.id,
+                        name: category.name as string,
+                        slug: category.slug as string,
+                        imageUrl,
+                        hint,
+                    };
+                });
+
+                const resolvedCategories = await Promise.all(categoryListPromises);
+                setCategoriesWithImages(resolvedCategories);
+
             } catch (error) {
                 console.error("Failed to fetch categories:", error);
             } finally {
@@ -47,7 +76,7 @@ export default function ProductsPage() {
             }
         };
 
-        fetchCategories();
+        fetchCategoriesAndImages();
     }, []);
 
     return (
@@ -66,7 +95,7 @@ export default function ProductsPage() {
                     <div className="flex justify-center items-center h-64">
                         <Loader2 className="h-8 w-8 animate-spin" />
                     </div>
-                ) : categories.length === 0 ? (
+                ) : categoriesWithImages.length === 0 ? (
                     <p className="text-center text-muted-foreground py-16">Aucune catégorie n'a été configurée.</p>
                 ) : (
                     <Carousel
@@ -76,18 +105,18 @@ export default function ProductsPage() {
                         className="w-full"
                     >
                         <CarouselContent>
-                        {categories.map((category) => (
+                        {categoriesWithImages.map((category) => (
                             <CarouselItem key={category.id} className="md:basis-1/2 lg:basis-1/3">
                                 <Link href={`/products/${category.slug}`}>
                                     <div className="p-1">
                                         <Card className="overflow-hidden">
                                             <CardContent className="relative flex aspect-video items-center justify-center p-0">
                                                 <Image 
-                                                    src={`https://picsum.photos/seed/${category.slug}/800/600`} 
+                                                    src={category.imageUrl} 
                                                     alt={category.name} 
                                                     fill 
                                                     className="object-cover transition-transform duration-500 group-hover:scale-110" 
-                                                    data-ai-hint={`${category.name} fashion`} 
+                                                    data-ai-hint={category.hint} 
                                                 />
                                                 <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
                                                     <span className="text-2xl font-semibold text-white font-headline">{category.name.toUpperCase()}</span>
@@ -120,21 +149,21 @@ export default function ProductsPage() {
                     <div className="flex justify-center items-center h-64">
                         <Loader2 className="h-8 w-8 animate-spin" />
                     </div>
-                ) : categories.length === 0 ? (
+                ) : categoriesWithImages.length === 0 ? (
                     <p className="text-center text-muted-foreground py-16">Aucune catégorie n'a été configurée.</p>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {categories.map((category) => (
+                        {categoriesWithImages.map((category) => (
                             <Card key={category.id} className="group overflow-hidden">
                                 <CardContent className="p-0">
                                     <Link href={`/products/${category.slug}`} className="block">
                                         <div className="relative aspect-square">
                                              <Image 
-                                                src={`https://picsum.photos/seed/${category.id}/600/600`} 
+                                                src={category.imageUrl} 
                                                 alt={category.name} 
                                                 fill 
                                                 className="object-cover transition-transform duration-500 group-hover:scale-110" 
-                                                data-ai-hint={`${category.name} model`} 
+                                                data-ai-hint={category.hint} 
                                             />
                                         </div>
                                     </Link>
