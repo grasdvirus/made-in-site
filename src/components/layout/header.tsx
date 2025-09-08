@@ -24,6 +24,9 @@ import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/use-cart.tsx';
+import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
+
 
 const navLinks = [
   { href: '/', label: 'Accueil' },
@@ -45,6 +48,9 @@ export function Header() {
   const { total, itemCount } = useCart();
   const router = useRouter();
 
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
   const handleSignOut = async () => {
     await signOut(auth);
     router.push('/');
@@ -52,8 +58,29 @@ export function Header() {
 
   const isAdmin = user && user.email === ADMIN_EMAIL;
 
+  useEffect(() => {
+    const controlNavbar = () => {
+      if (typeof window !== 'undefined') { 
+        if (window.scrollY > lastScrollY && window.scrollY > 80) { // if scroll down hide the navbar
+          setIsVisible(false);
+        } else { // if scroll up show the navbar
+          setIsVisible(true);
+        }
+        setLastScrollY(window.scrollY); 
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', controlNavbar);
+
+      return () => {
+        window.removeEventListener('scroll', controlNavbar);
+      };
+    }
+  }, [lastScrollY]);
+
   return (
-    <header className="p-4 md:p-6 border-b bg-background/50 sticky top-0 z-40">
+    <header className={cn("p-4 md:p-6 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-40 transition-transform duration-300", isVisible ? 'translate-y-0' : '-translate-y-full')}>
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center space-x-12">
           <Link
