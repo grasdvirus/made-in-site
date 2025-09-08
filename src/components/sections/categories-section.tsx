@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { collection, getDocs, query, where, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Loader2 } from 'lucide-react';
+import type { Product } from '@/app/admin/products/page';
 
 interface CategorySetting {
     id: string;
@@ -50,12 +51,13 @@ export function CategoriesSection() {
                     const productSnapshot = await getDocs(q);
 
                     if (!productSnapshot.empty) {
+                        const product = productSnapshot.docs[0].data() as Product;
                         filteredCategories.push({
                             id: cat.id,
                             name: cat.name,
                             slug: cat.slug,
-                            image: `https://picsum.photos/seed/${cat.slug}/400/500`,
-                            hint: `${cat.name} fashion`,
+                            image: product.imageUrl || `https://picsum.photos/seed/${cat.slug}/400/500`,
+                            hint: product.hint || `${cat.name} fashion`,
                             href: `/products/${cat.slug}`
                         });
                     }
