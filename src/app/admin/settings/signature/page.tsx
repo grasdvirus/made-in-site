@@ -9,11 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, User, Briefcase, Mail, Phone, Link2, Instagram, Youtube } from 'lucide-react';
+import { Loader2, Save, User, Briefcase, Mail, Phone, Link2, Instagram, Youtube, Upload } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import Image from 'next/image';
 
 const ADMIN_EMAIL = 'grasdvirus@gmail.com';
+const DEFAULT_AVATAR = 'https://i.pravatar.cc/150';
 
 const TikTokIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2859 3333" shapeRendering="geometricPrecision" textRendering="geometricPrecision" imageRendering="optimizeQuality" fillRule="evenodd" clipRule="evenodd" {...props}><path d="M2081 0c55 473 319 755 778 785v532c-266 26-499-61-770-225v995c0 1264-1378 1659-1932 753-356-583-138-1606 1004-1647v561c-87 14-180 36-265 65-254 86-458 249-458 522 0 341 230 594 523 594 294 0 524-253 524-594v-1031c0-38 3-75 10-112h524v1031c0 341 230 594 523 594 294 0 524-253 524-594v-532c-266-26-499 61-770 225V0z"/></svg>
@@ -35,6 +37,7 @@ interface SignatureSettings {
     whatsappUrl: string;
     tiktokUrl: string;
     youtubeUrl: string;
+    imageUrl: string;
 }
 
 export default function SignatureSettingsPage() {
@@ -53,7 +56,8 @@ export default function SignatureSettingsPage() {
         instagramUrl: '',
         whatsappUrl: '',
         tiktokUrl: '',
-        youtubeUrl: ''
+        youtubeUrl: '',
+        imageUrl: '',
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -77,7 +81,8 @@ export default function SignatureSettingsPage() {
                     instagramUrl: data.instagramUrl || '',
                     whatsappUrl: data.whatsappUrl || '',
                     tiktokUrl: data.tiktokUrl || '',
-                    youtubeUrl: data.youtubeUrl || ''
+                    youtubeUrl: data.youtubeUrl || '',
+                    imageUrl: data.imageUrl || '',
                 });
             }
         } catch (error: any) {
@@ -108,6 +113,29 @@ export default function SignatureSettingsPage() {
         const { name, value } = e.target;
         setSettings(prev => ({...prev, [name]: value}));
     };
+    
+    const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+    
+        setIsSaving(true);
+        const formData = new FormData();
+        formData.append('file', file);
+    
+        try {
+          const response = await fetch('/api/upload', { method: 'POST', body: formData });
+          if (!response.ok) throw new Error((await response.json()).error || 'Échec du téléversement');
+          
+          const { url } = await response.json();
+          setSettings(prev => ({ ...prev, imageUrl: url }));
+          toast({ title: 'Image mise à jour. N\'oubliez pas d\'enregistrer.' });
+    
+        } catch (error: any) {
+          toast({ variant: 'destructive', title: 'Erreur de téléversement', description: error.message });
+        } finally {
+          setIsSaving(false);
+        }
+    };
 
     const handleSaveChanges = async () => {
         setIsSaving(true);
@@ -135,7 +163,7 @@ export default function SignatureSettingsPage() {
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
         );
-      }
+    }
 
     return (
         <div className="flex-1 space-y-4 pt-6">
@@ -146,31 +174,60 @@ export default function SignatureSettingsPage() {
                     Enregistrer
                 </Button>
             </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Vos Informations</CardTitle>
+                            <CardDescription>
+                                Ces informations seront affichées sur la page "Signet par Cristan".
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <label htmlFor="fullName" className="flex items-center gap-2"><User className="w-4 h-4" />Nom Complet</label>
+                                <Input id="fullName" name="fullName" value={settings.fullName} onChange={handleInputChange} placeholder="Ex: John Doe"/>
+                            </div>
+                            <div className="space-y-2">
+                                <label htmlFor="bio" className="flex items-center gap-2"><Briefcase className="w-4 h-4" />Biographie Courte</label>
+                                <Textarea id="bio" name="bio" value={settings.bio} onChange={handleInputChange} placeholder="Ex: Développeur Web Full-Stack & Designer UI/UX" rows={3}/>
+                            </div>
+                             <div className="space-y-2">
+                                <label htmlFor="email" className="flex items-center gap-2"><Mail className="w-4 h-4" />Email de Contact</label>
+                                <Input id="email" name="email" value={settings.email} onChange={handleInputChange} placeholder="contact@example.com"/>
+                            </div>
+                             <div className="space-y-2">
+                                <label htmlFor="phone" className="flex items-center gap-2"><Phone className="w-4 h-4" />Téléphone</label>
+                                <Input id="phone" name="phone" value={settings.phone} onChange={handleInputChange} placeholder="+1 23 456 7890"/>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+                <div>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Photo de Profil</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex flex-col items-center gap-4">
+                            <Image src={settings.imageUrl || DEFAULT_AVATAR} alt="Aperçu" width={128} height={128} className="rounded-full object-cover bg-muted" />
+                            <Button asChild variant="outline">
+                                <label htmlFor="image-upload" className="cursor-pointer flex items-center">
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Changer
+                                    <Input id="image-upload" type="file" accept="image/*" className="sr-only" onChange={handleImageUpload} disabled={isSaving}/>
+                                </label>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Vos Informations Personnelles</CardTitle>
-                    <CardDescription>
-                        Ces informations seront affichées sur la page "Signet par Cristan".
-                    </CardDescription>
+                    <CardTitle>Liens & Réseaux Sociaux</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                     <div className="space-y-2">
-                        <label htmlFor="fullName" className="flex items-center gap-2"><User className="w-4 h-4" />Nom Complet</label>
-                        <Input id="fullName" name="fullName" value={settings.fullName} onChange={handleInputChange} placeholder="Ex: John Doe"/>
-                    </div>
-                     <div className="space-y-2">
-                        <label htmlFor="bio" className="flex items-center gap-2"><Briefcase className="w-4 h-4" />Biographie Courte</label>
-                        <Textarea id="bio" name="bio" value={settings.bio} onChange={handleInputChange} placeholder="Ex: Développeur Web Full-Stack & Designer UI/UX" rows={3}/>
-                    </div>
-                     <div className="space-y-2">
-                        <label htmlFor="email" className="flex items-center gap-2"><Mail className="w-4 h-4" />Email de Contact</label>
-                        <Input id="email" name="email" value={settings.email} onChange={handleInputChange} placeholder="contact@example.com"/>
-                    </div>
-                     <div className="space-y-2">
-                        <label htmlFor="phone" className="flex items-center gap-2"><Phone className="w-4 h-4" />Téléphone</label>
-                        <Input id="phone" name="phone" value={settings.phone} onChange={handleInputChange} placeholder="+1 23 456 7890"/>
-                    </div>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <div className="space-y-2">
                         <label htmlFor="portfolioUrl" className="flex items-center gap-2"><Link2 className="w-4 h-4" />URL du Portfolio</label>
                         <Input id="portfolioUrl" name="portfolioUrl" value={settings.portfolioUrl} onChange={handleInputChange} placeholder="https://mon-portfolio.com"/>
@@ -204,5 +261,3 @@ export default function SignatureSettingsPage() {
         </div>
     );
 }
-
-    

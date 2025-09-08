@@ -38,6 +38,7 @@ interface SignatureSettings {
     whatsappUrl: string;
     tiktokUrl: string;
     youtubeUrl: string;
+    imageUrl: string;
 }
 
 export default function SignaturePage() {
@@ -91,11 +92,11 @@ export default function SignaturePage() {
                 </div>
                 <CardContent className="p-8 text-center">
                     <Image 
-                        src={`https://i.pravatar.cc/150?u=${settings.email}`} 
+                        src={settings.imageUrl || `https://i.pravatar.cc/150?u=${settings.email}`} 
                         alt={`Photo de ${settings.fullName}`}
                         width={128}
                         height={128}
-                        className="rounded-full mx-auto -mt-24 mb-4 border-4 border-background"
+                        className="rounded-full mx-auto -mt-24 mb-4 border-4 border-background object-cover"
                         data-ai-hint="portrait professional"
                     />
                     <h2 className="text-3xl font-bold font-headline">{settings.fullName}</h2>
@@ -133,5 +134,3 @@ export default function SignaturePage() {
     </div>
   );
 }
-
-    
