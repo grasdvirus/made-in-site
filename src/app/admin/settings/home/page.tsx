@@ -8,18 +8,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save, Upload } from 'lucide-react';
+import { Loader2, Save, Upload, Trash2, PlusCircle } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import Image from 'next/image';
 
 const ADMIN_EMAIL = 'grasdvirus@gmail.com';
+const MAX_IMAGES = 10;
 
 interface HeroSettings {
     title: string;
     subtitle: string;
     promoText: string;
-    imageUrl: string;
+    imageUrls: string[];
 }
 
 export default function HomeSettingsPage() {
@@ -31,7 +32,7 @@ export default function HomeSettingsPage() {
         title: '',
         subtitle: '',
         promoText: '',
-        imageUrl: '',
+        imageUrls: [],
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -48,14 +49,14 @@ export default function HomeSettingsPage() {
                     title: data.hero?.title || 'SOLDES DU BLACK FRIDAY',
                     subtitle: data.hero?.subtitle || '20 Nov - 30 Nov',
                     promoText: data.hero?.promoText || 'Réduction de 40%* sur tous les produits.',
-                    imageUrl: data.hero?.imageUrl || 'https://picsum.photos/1400/500'
+                    imageUrls: data.hero?.imageUrls || ['https://picsum.photos/1400/500']
                 });
             } else {
                  setSettings({
                     title: 'SOLDES DU BLACK FRIDAY',
                     subtitle: '20 Nov - 30 Nov',
                     promoText: 'Réduction de 40%* sur tous les produits.',
-                    imageUrl: 'https://picsum.photos/1400/500'
+                    imageUrls: ['https://picsum.photos/1400/500']
                 });
             }
         } catch (error: any) {
@@ -89,7 +90,7 @@ export default function HomeSettingsPage() {
     
     const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (!file) return;
+        if (!file || settings.imageUrls.length >= MAX_IMAGES) return;
 
         setIsSaving(true);
         const formData = new FormData();
@@ -101,14 +102,21 @@ export default function HomeSettingsPage() {
             
             const { url } = await response.json();
 
-            setSettings(prev => ({ ...prev, imageUrl: url }));
-            toast({ title: 'Image mise à jour. N\'oubliez pas d\'enregistrer les modifications.' });
+            setSettings(prev => ({ ...prev, imageUrls: [...prev.imageUrls, url] }));
+            toast({ title: 'Image ajoutée. N\'oubliez pas d\'enregistrer les modifications.' });
 
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Erreur de téléversement', description: error.message });
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const handleRemoveImage = (indexToRemove: number) => {
+        setSettings(prev => ({
+            ...prev,
+            imageUrls: prev.imageUrls.filter((_, index) => index !== indexToRemove)
+        }));
     };
 
     const handleSaveChanges = async () => {
@@ -149,44 +157,63 @@ export default function HomeSettingsPage() {
                 </Button>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Contenu de la Bannière Principale (Hero Section)</CardTitle>
-                    <CardDescription>
-                        Modifiez ici les textes et l'image de la grande bannière sur la page d'accueil.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                     <div className="space-y-2">
-                        <label htmlFor="title">Titre Principal</label>
-                        <Input id="title" name="title" value={settings.title} onChange={handleInputChange} placeholder="Ex: SOLDES D'ÉTÉ"/>
-                    </div>
-                     <div className="space-y-2">
-                        <label htmlFor="subtitle">Sous-titre / Dates</label>
-                        <Input id="subtitle" name="subtitle" value={settings.subtitle} onChange={handleInputChange} placeholder="Ex: 1er au 31 juillet"/>
-                    </div>
-                     <div className="space-y-2">
-                        <label htmlFor="promoText">Texte Promotionnel</label>
-                        <Input id="promoText" name="promoText" value={settings.promoText} onChange={handleInputChange} placeholder="Ex: Jusqu'à -50% sur une sélection"/>
-                    </div>
-                    <div className="space-y-4">
-                        <label htmlFor="imageUrl">Image de fond</label>
-                        <div className="flex items-center gap-4">
-                            <Image src={settings.imageUrl || 'https://placehold.co/400x500/EFEFEF/333333?text=Image'} alt="Aperçu de la bannière" width={100} height={50} className="rounded-md object-cover bg-muted" />
-                            <div className="flex-grow">
-                                <Input id="imageUrl" name="imageUrl" value={settings.imageUrl} onChange={handleInputChange} placeholder="https://... ou téléversez une image"/>
-                            </div>
-                            <Button asChild variant="outline">
-                                <label htmlFor="image-upload" className="cursor-pointer flex items-center">
-                                    <Upload className="h-4 w-4 mr-2" />
-                                    Téléverser
-                                    <Input id="image-upload" type="file" accept="image/*" className="sr-only" onChange={handleImageUpload}/>
-                                </label>
-                            </Button>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Contenu de la Bannière</CardTitle>
+                        <CardDescription>
+                            Modifiez ici les textes qui apparaissent sur la bannière.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                            <label htmlFor="title">Titre Principal</label>
+                            <Input id="title" name="title" value={settings.title} onChange={handleInputChange} placeholder="Ex: SOLDES D'ÉTÉ"/>
                         </div>
-                    </div>
-                </CardContent>
-            </Card>
+                        <div className="space-y-2">
+                            <label htmlFor="subtitle">Sous-titre / Dates</label>
+                            <Input id="subtitle" name="subtitle" value={settings.subtitle} onChange={handleInputChange} placeholder="Ex: 1er au 31 juillet"/>
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="promoText">Texte Promotionnel</label>
+                            <Input id="promoText" name="promoText" value={settings.promoText} onChange={handleInputChange} placeholder="Ex: Jusqu'à -50% sur une sélection"/>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Images de la Bannière ({settings.imageUrls.length}/{MAX_IMAGES})</CardTitle>
+                        <CardDescription>
+                            Gérez les images qui s'affichent aléatoirement.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {settings.imageUrls.map((url, index) => (
+                                <div key={index} className="relative group aspect-video">
+                                    <Image src={url} alt={`Bannière ${index + 1}`} fill className="rounded-md object-cover bg-muted"/>
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-md">
+                                        <Button variant="destructive" size="icon" onClick={() => handleRemoveImage(index)}>
+                                            <Trash2 className="h-4 w-4"/>
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                             {settings.imageUrls.length < MAX_IMAGES && (
+                                <Button asChild variant="outline" className="aspect-video w-full h-full flex-col gap-2 cursor-pointer">
+                                    <label htmlFor="image-upload">
+                                        <PlusCircle className="h-6 w-6"/>
+                                        <span className="text-xs">Ajouter</span>
+                                        <Input id="image-upload" type="file" accept="image/*" className="sr-only" onChange={handleImageUpload} disabled={isSaving}/>
+                                    </label>
+                                </Button>
+                             )}
+                        </div>
+                        {isSaving && <div className="flex items-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Téléversement en cours...</div>}
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }

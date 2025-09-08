@@ -13,12 +13,13 @@ interface HeroSettings {
     title: string;
     subtitle: string;
     promoText: string;
-    imageUrl: string;
+    imageUrls: string[];
 }
 
 export function HeroSection() {
   const [settings, setSettings] = useState<HeroSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [randomImageUrl, setRandomImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -27,26 +28,36 @@ export function HeroSection() {
             const docRef = doc(db, 'settings', 'homePage');
             const docSnap = await getDoc(docRef);
 
+            let loadedSettings: HeroSettings;
             if (docSnap.exists() && docSnap.data().hero) {
-                setSettings(docSnap.data().hero as HeroSettings);
+                loadedSettings = docSnap.data().hero as HeroSettings;
             } else {
                 // Fallback to default if no settings are found
-                setSettings({
+                loadedSettings = {
                     title: 'SOLDES DU BLACK FRIDAY',
                     subtitle: '20 Nov - 30 Nov',
                     promoText: 'Réduction de 40%* sur tous les produits.',
-                    imageUrl: 'https://picsum.photos/1400/500'
-                });
+                    imageUrls: ['https://picsum.photos/1400/500']
+                };
             }
+            setSettings(loadedSettings);
+
+            if (loadedSettings.imageUrls && loadedSettings.imageUrls.length > 0) {
+                const randomIndex = Math.floor(Math.random() * loadedSettings.imageUrls.length);
+                setRandomImageUrl(loadedSettings.imageUrls[randomIndex]);
+            }
+
         } catch (error) {
             console.error("Error fetching hero settings:", error);
             // Set default settings on error
-            setSettings({
+            const defaultSettings = {
                 title: 'SOLDES DU BLACK FRIDAY',
                 subtitle: '20 Nov - 30 Nov',
                 promoText: 'Réduction de 40%* sur tous les produits.',
-                imageUrl: 'https://picsum.photos/1400/500'
-            });
+                imageUrls: ['https://picsum.photos/1400/500']
+            };
+            setSettings(defaultSettings);
+            setRandomImageUrl(defaultSettings.imageUrls[0]);
         } finally {
             setIsLoading(false);
         }
@@ -55,7 +66,7 @@ export function HeroSection() {
     fetchSettings();
   }, []);
 
-  if (isLoading || !settings) {
+  if (isLoading || !settings || !randomImageUrl) {
     return (
         <section className="p-6 md:p-10">
              <Skeleton className="rounded-2xl w-full min-h-[500px]" />
@@ -66,8 +77,8 @@ export function HeroSection() {
   return (
     <section className="p-6 md:p-10">
       <div 
-        className="relative overflow-hidden rounded-2xl p-8 md:p-16 lg:p-24 text-white flex flex-col justify-center min-h-[500px] bg-cover bg-center" 
-        style={{ backgroundImage: `url('${settings.imageUrl}')` }} 
+        className="relative overflow-hidden rounded-2xl p-8 md:p-16 lg:p-24 text-white flex flex-col justify-center min-h-[500px] bg-cover bg-center transition-all duration-500" 
+        style={{ backgroundImage: `url('${randomImageUrl}')` }} 
         data-ai-hint="fashion sale"
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-black/80 to-transparent rounded-2xl"></div>
