@@ -48,12 +48,9 @@ export function Footer() {
           <p className="text-muted-foreground text-sm">Où vous créez votre propre style.</p>
         </div>
         <div>
-          <h5 className="font-bold mb-4">BOUTIQUE</h5>
+           <h5 className="font-bold mb-4">SIGNATURE</h5>
           <ul className="space-y-3 text-sm text-muted-foreground">
-            <li><Link href="/products/hommes" className="hover:text-foreground">Mode Homme</Link></li>
-            <li><Link href="/products/femmes" className="hover:text-foreground">Mode Femme</Link></li>
-            <li><Link href="/products/sacs" className="hover:text-foreground">Sacs</Link></li>
-            <li><Link href="/products/montres" className="hover:text-foreground">Montres</Link></li>
+            <li><Link href="/signature" className="hover:text-foreground">Signet par Cristan</Link></li>
           </ul>
         </div>
         <div>
@@ -77,7 +74,7 @@ export function Footer() {
       </div>
       <div className="container mx-auto py-6 px-6 md:px-10 border-t flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-0 text-center sm:text-left">
-          <Link href="/signature" className="hover:text-foreground">Signet par Cristan</Link>
+          <p>&copy; {new Date().getFullYear()} EzyRetail. Tous droits réservés.</p>
           <span className="hidden sm:inline">|</span>
           <Link href="/privacy-policy" className="hover:text-foreground">Politique de confidentialité</Link>
           <Link href="/terms-and-conditions" className="hover:text-foreground">Conditions de service</Link>
