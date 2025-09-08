@@ -76,7 +76,9 @@ export function Footer() {
         </div>
       </div>
       <div className="container mx-auto py-6 px-6 md:px-10 border-t flex flex-col sm:flex-row justify-between items-center text-sm text-muted-foreground">
-        <div className="flex space-x-4 mb-4 sm:mb-0">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mb-4 sm:mb-0 text-center sm:text-left">
+          <Link href="/signature" className="hover:text-foreground">Signet par Cristan</Link>
+          <span className="hidden sm:inline">|</span>
           <Link href="/privacy-policy" className="hover:text-foreground">Politique de confidentialité</Link>
           <Link href="/terms-and-conditions" className="hover:text-foreground">Conditions de service</Link>
         </div>
