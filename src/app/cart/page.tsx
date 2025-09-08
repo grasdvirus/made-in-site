@@ -28,16 +28,20 @@ export default function CartPage() {
                 {items.length > 0 ? items.map((item) => (
                   <div key={item.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.name}
-                        width={80}
-                        height={80}
-                        className="rounded-md object-cover"
-                        data-ai-hint={item.hint}
-                      />
+                      <Link href={`/products/${item.category}/${item.id}`}>
+                        <Image
+                          src={item.imageUrl}
+                          alt={item.name}
+                          width={80}
+                          height={80}
+                          className="rounded-md object-cover"
+                          data-ai-hint={item.hint}
+                        />
+                      </Link>
                       <div>
-                        <h3 className="font-semibold">{item.name}</h3>
+                        <Link href={`/products/${item.category}/${item.id}`} className="hover:underline">
+                            <h3 className="font-semibold">{item.name}</h3>
+                        </Link>
                         <p className="text-muted-foreground">{item.price.toLocaleString('fr-FR')} FCFA</p>
                       </div>
                     </div>

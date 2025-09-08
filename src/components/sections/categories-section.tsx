@@ -38,15 +38,14 @@ export function CategoriesSection() {
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    // Assumant que les catégories sont stockées dans un champ `categories`
                     setCategories(data.categories || []);
                 } else {
                     console.log("No such document!");
-                    setCategories([]); // Mettre à vide si aucune config n'est trouvée
+                    setCategories([]);
                 }
             } catch (error) {
                 console.error("Error fetching categories:", error);
-                setCategories([]); // Gérer l'erreur
+                setCategories([]);
             } finally {
                 setIsLoading(false);
             }
@@ -55,6 +54,8 @@ export function CategoriesSection() {
         fetchCategories();
     }, []);
 
+    const visibleCategories = categories.slice(0, 4);
+
     return (
         <section className="py-12 px-6 md:px-10">
             <div className="flex flex-col md:flex-row justify-between md:items-end mb-8 gap-4">
@@ -62,7 +63,9 @@ export function CategoriesSection() {
                 <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6">
                     <p className="text-muted-foreground max-w-sm">Explorez nos collections, conçues pour vous apporter les dernières tendances et des styles intemporels.</p>
                     <Button asChild variant="outline" className="flex-shrink-0 rounded-full hidden sm:inline-flex">
-                        <Link href="/products">Toutes les catégories</Link>
+                         <Link href="/products">
+                            {categories.length > 4 ? `Voir les ${categories.length} catégories` : 'Toutes les catégories'}
+                        </Link>
                     </Button>
                 </div>
             </div>
@@ -72,14 +75,16 @@ export function CategoriesSection() {
                 </div>
             ) : categories.length > 0 ? (
                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {categories.map(cat => <CategoryCard key={cat.id} {...cat} />)}
+                    {visibleCategories.map(cat => <CategoryCard key={cat.id} {...cat} />)}
                 </div>
             ) : (
                 <p className="text-center text-muted-foreground py-16">Aucune catégorie à afficher pour le moment.</p>
             )}
            
             <Button asChild variant="outline" className="sm:hidden block mt-6 w-full rounded-full">
-                <Link href="/products">Toutes les catégories</Link>
+                 <Link href="/products">
+                    {categories.length > 4 ? `Voir les ${categories.length} catégories` : 'Toutes les catégories'}
+                </Link>
             </Button>
         </section>
     );

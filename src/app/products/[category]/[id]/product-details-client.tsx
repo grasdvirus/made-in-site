@@ -5,16 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import type { Product } from "@/app/admin/page";
+import type { Product } from "@/app/admin/products/page";
 import { Minus, Plus, Star } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { useCart } from "@/hooks/use-cart";
+import { useCart } from "@/hooks/use-cart.tsx";
+import { Badge } from "@/components/ui/badge";
 
 export function ProductDetailsClient({ product }: { product: Product }) {
     const [quantity, setQuantity] = useState(1);
     const { toast } = useToast();
     const { addItem } = useCart();
+    
+    const availableSizes = product.sizes?.split(',').map(s => s.trim()).filter(Boolean) || [];
+    const availableColors = product.colors?.split(',').map(s => s.trim()).filter(Boolean) || [];
 
     const handleAddToCart = () => {
         addItem(product, quantity);
@@ -50,6 +54,24 @@ export function ProductDetailsClient({ product }: { product: Product }) {
             <p className="text-muted-foreground mb-6">{product.description}</p>
             
             <Separator className="my-6" />
+
+            {availableSizes.length > 0 && (
+                <div className="flex items-center gap-4 mb-4">
+                    <p className="font-semibold">Tailles :</p>
+                    <div className="flex flex-wrap gap-2">
+                        {availableSizes.map(size => <Badge key={size} variant="outline">{size}</Badge>)}
+                    </div>
+                </div>
+            )}
+
+             {availableColors.length > 0 && (
+                <div className="flex items-center gap-4 mb-6">
+                    <p className="font-semibold">Couleurs :</p>
+                     <div className="flex flex-wrap gap-2">
+                        {availableColors.map(color => <Badge key={color} variant="outline">{color}</Badge>)}
+                    </div>
+                </div>
+            )}
 
             <div className="flex items-center gap-4 mb-6">
                 <p>Quantité:</p>

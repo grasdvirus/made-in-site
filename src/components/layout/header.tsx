@@ -72,24 +72,9 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="text-sm text-muted-foreground hover:text-foreground p-0">
-                        Produits
-                        <ChevronDown className="h-4 w-4 ml-1" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuItem asChild>
-                        <Link href="/products">Toutes les catégories</Link>
-                    </DropdownMenuItem>
-                    {categoryLinks.map((link) => (
-                        <DropdownMenuItem key={link.label} asChild>
-                            <Link href={link.href}>{link.label}</Link>
-                        </DropdownMenuItem>
-                    ))}
-                </DropdownMenuContent>
-            </DropdownMenu>
+            <Link href="/products" className="text-sm text-muted-foreground hover:text-foreground">
+                Produits
+            </Link>
             {isAdmin && (
                 <Link href="/admin" className="text-sm text-muted-foreground hover:text-foreground flex items-center">
                     <Shield className="h-4 w-4 mr-1"/>
@@ -179,11 +164,6 @@ export function Header() {
                 <SheetClose asChild>
                     <Link href="/products" className="text-muted-foreground hover:text-foreground">Produits</Link>
                 </SheetClose>
-                 {categoryLinks.map((link) => (
-                    <SheetClose asChild key={link.label}>
-                        <Link href={link.href} className="ml-4 text-muted-foreground/80 hover:text-foreground text-lg">{link.label}</Link>
-                    </SheetClose>
-                 ))}
                  {isAdmin && (
                     <SheetClose asChild>
                         <Link href="/admin" className="text-muted-foreground hover:text-foreground flex items-center">
