@@ -9,22 +9,53 @@ import Image from "next/image";
 import { WalletCards, Diamond, Loader2 } from "lucide-react";
 import { useCart } from "@/hooks/use-cart.tsx";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+
+interface PaymentMethod {
+    id: string;
+    name: string;
+    details: string;
+    recipient: string;
+    iconColor?: string;
+}
 
 export default function CheckoutPage() {
   const { items, subtotal, clearCart, itemCount } = useCart();
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingMethods, setIsFetchingMethods] = useState(true);
   const [customerInfo, setCustomerInfo] = useState({ fullName: '', phone: '', email: '', address: '', notes: '' });
-
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  
   // Free shipping if 5 or more items in cart
   const shipping = itemCount >= 5 ? 0 : 5000;
   const total = subtotal + shipping;
+
+  const fetchPaymentMethods = useCallback(async () => {
+    setIsFetchingMethods(true);
+    try {
+        const docRef = doc(db, 'settings', 'paymentMethods');
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            setPaymentMethods(docSnap.data().methods || []);
+        }
+    } catch (error) {
+        console.error("Error fetching payment methods:", error);
+        toast({ variant: 'destructive', title: 'Erreur', description: 'Impossible de charger les méthodes de paiement.' });
+    } finally {
+        setIsFetchingMethods(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchPaymentMethods();
+  }, [fetchPaymentMethods]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -104,23 +135,25 @@ export default function CheckoutPage() {
                     Veuillez envoyer le montant total de <span className="text-primary font-bold">{total.toLocaleString('fr-FR')} FCFA</span> à l'un des
                     contacts suivants :
                   </p>
-                  <ul className="space-y-2 text-muted-foreground">
-                    <li className="flex items-center gap-2">
-                      <Diamond className="h-4 w-4 text-orange-500" />
-                      <span>
-                        Orange Money : +225 07 08 22 56 82 (Nom: N'guia Achi
-                        Nadege)
-                      </span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Diamond className="h-4 w-4 text-blue-500" />
-                      <span>WAVE : +225 05 03 65 48 86</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Diamond className="h-4 w-4 text-blue-500" />
-                      <span>WAVE : +225 07 08 22 56 82</span>
-                    </li>
-                  </ul>
+                  {isFetchingMethods ? (
+                    <div className="flex justify-center items-center h-24">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                    </div>
+                  ) : paymentMethods.length > 0 ? (
+                    <ul className="space-y-2 text-muted-foreground">
+                        {paymentMethods.map(method => (
+                             <li key={method.id} className="flex items-center gap-2">
+                                <Diamond className="h-4 w-4" style={{ color: method.iconColor || 'hsl(var(--primary))' }} />
+                                <span>
+                                    {method.name} : {method.details}
+                                    {method.recipient && ` (Nom: ${method.recipient})`}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                  ) : (
+                    <p className="text-destructive text-center">Aucune méthode de paiement configurée.</p>
+                  )}
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Après le paiement, veuillez remplir et soumettre le formulaire avec

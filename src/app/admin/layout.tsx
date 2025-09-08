@@ -2,7 +2,7 @@
 'use client'
 
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from '@/components/ui/sidebar';
-import { Home, ShoppingCart, Package, Users, LineChart, Tag, Settings, Info, LayoutGrid, FileText, Link2, ListOrdered, Pencil } from 'lucide-react';
+import { Home, ShoppingCart, Package, Users, LineChart, Tag, Settings, Info, LayoutGrid, FileText, Link2, ListOrdered, Pencil, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -15,6 +15,7 @@ const AdminSidebar = () => {
         { href: '/admin/settings/home', label: 'Bannière Accueil', icon: Settings },
         { href: '/admin/settings/about', label: 'Page "À Propos"', icon: FileText },
         { href: '/admin/settings/social', label: 'Réseaux Sociaux', icon: Link2 },
+        { href: '/admin/settings/payment', label: 'Paiement', icon: CreditCard },
         { href: '/admin/settings/signature', label: 'Page Signature', icon: Pencil },
     ];
 
