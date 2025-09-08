@@ -8,9 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, Upload } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import Image from 'next/image';
 
 const ADMIN_EMAIL = 'grasdvirus@gmail.com';
 
@@ -85,6 +86,30 @@ export default function HomeSettingsPage() {
         const { name, value } = e.target;
         setSettings(prev => ({...prev, [name]: value}));
     };
+    
+    const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsSaving(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/api/upload', { method: 'POST', body: formData });
+            if (!response.ok) throw new Error((await response.json()).error || 'Échec du téléversement');
+            
+            const { url } = await response.json();
+
+            setSettings(prev => ({ ...prev, imageUrl: url }));
+            toast({ title: 'Image mise à jour. N\'oubliez pas d\'enregistrer les modifications.' });
+
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Erreur de téléversement', description: error.message });
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const handleSaveChanges = async () => {
         setIsSaving(true);
@@ -144,9 +169,21 @@ export default function HomeSettingsPage() {
                         <label htmlFor="promoText">Texte Promotionnel</label>
                         <Input id="promoText" name="promoText" value={settings.promoText} onChange={handleInputChange} placeholder="Ex: Jusqu'à -50% sur une sélection"/>
                     </div>
-                    <div className="space-y-2">
-                        <label htmlFor="imageUrl">URL de l'image de fond</label>
-                        <Input id="imageUrl" name="imageUrl" value={settings.imageUrl} onChange={handleInputChange} placeholder="https://..."/>
+                    <div className="space-y-4">
+                        <label htmlFor="imageUrl">Image de fond</label>
+                        <div className="flex items-center gap-4">
+                            <Image src={settings.imageUrl || 'https://placehold.co/400x500/EFEFEF/333333?text=Image'} alt="Aperçu de la bannière" width={100} height={50} className="rounded-md object-cover bg-muted" />
+                            <div className="flex-grow">
+                                <Input id="imageUrl" name="imageUrl" value={settings.imageUrl} onChange={handleInputChange} placeholder="https://... ou téléversez une image"/>
+                            </div>
+                            <Button asChild variant="outline">
+                                <label htmlFor="image-upload" className="cursor-pointer flex items-center">
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Téléverser
+                                    <Input id="image-upload" type="file" accept="image/*" className="sr-only" onChange={handleImageUpload}/>
+                                </label>
+                            </Button>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
