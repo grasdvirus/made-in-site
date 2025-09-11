@@ -21,7 +21,7 @@ const AdminSidebar = () => {
 
     return (
         <Sidebar>
-            <SidebarContent>
+            <SidebarContent className="bg-background">
                 <SidebarHeader>
                     <Link href="/admin/products" className="flex items-center gap-2">
                          <div className="w-10 h-10 bg-primary/20 text-primary rounded-full flex items-center justify-center text-xs">EZY</div>
