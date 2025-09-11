@@ -1,0 +1,43 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+    // Helper function to check if a user is an admin
+    function isAdmin() {
+      return request.auth.token.email == 'grasdvirus@gmail.com';
+    }
+
+    // Products: Public read, admin write
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Categories: Public read, admin write
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Orders:
+    // - Any user can create an order.
+    // - Only admins can read or update orders.
+    match /orders/{orderId} {
+      allow create: if true;
+      allow read, update: if isAdmin();
+      allow delete: if false; // Prevent accidental deletion
+    }
+
+    // Settings: Public read, admin write
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // Default deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
